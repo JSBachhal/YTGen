@@ -5,10 +5,14 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { DesktopViewComponent } from './desktop-view/desktop-view.component';
+import { RootComponent } from './root/root.component';
 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
+    DesktopViewComponent,
+    RootComponent
   ],
   imports: [
     CommonModule,
@@ -17,6 +21,6 @@ import { CommonModule } from '@angular/common';
     FormsModule
   ],
   providers: [],
-  bootstrap: [AppComponent]
+  bootstrap: [RootComponent]
 })
 export class AppModule { }

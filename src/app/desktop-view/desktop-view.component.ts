@@ -1,21 +1,21 @@
-import { AfterViewInit, Component, ElementRef, ViewChild } from '@angular/core';
-import { EditorHelper } from './editor';
+import { AfterViewInit, Component } from '@angular/core';
+import { EditorHelper } from '../editor';
 
 @Component({
-  selector: 'app-mobileView',
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss']
+  selector: 'app-desktop-view',
+  templateUrl: './desktop-view.component.html',
+  styleUrls: ['./desktop-view.component.scss']
 })
-export class AppComponent extends EditorHelper implements AfterViewInit {
+export class DesktopViewComponent extends EditorHelper implements AfterViewInit {
 
   // @ViewChild('player', { static: true })
   // player!: ElementRef<HTMLVideoElement>;
 
-  downloadEnable = true;
 
-  canvasWidth = 720;
-  canvasHeight = 1334;
-  imageBloackSize = 70;
+  downloadEnable = true;
+  canvasWidth = 3840;
+  canvasHeight = 2160;
+  imageBloackSize = 150;
   textBloackSize = 50;
 
   videoTime = 9;
@@ -39,47 +39,50 @@ export class AppComponent extends EditorHelper implements AfterViewInit {
   }
 
 
-  img!: any;
+  imagesArray: any[] = [];
   rotatedImage!: any;
   // Here, I created a function to draw image.
   async onFileSelected(e: any) {
     this.optons = this.generateOptions();
-    const reader = new FileReader();
-    const file = e.target.files[0];
-    // load to image to get it's width/height
-    const img = new Image();
-    img.onload = async () => {
-      this.img = img;
-      await this.renderImage();
-    };
+    const files = e.target.files as FileList;
+    const fileList: any[] = []
+    for (let index = 0; index < files.length; index++) {
+      const file = files[index];
 
-    // this is to setup loading the image
-    reader.onloadend = function () {
-      img.src = reader.result as any;
-    };
-    // this is to read the file
-    reader.readAsDataURL(file);
+      const reader = new FileReader();
+
+      const img = new Image();
+      img.onload = async () => {
+        this.imagesArray[index] = img;
+        await this.renderImage(0);
+      };
+
+      reader.onloadend = function () {
+        img.src = reader.result as any;
+      };
+      reader.readAsDataURL(file);
+
+    }
   }
 
   optons: any = [];
-  async renderImage() {
+  async renderImage(index: number) {
+
     const ctx = this.getContext();
-    await this.renderImageURI('assets/like.png',this.getCanvas().width - 80,300);
-    await this.renderImageURI('assets/subscribe.png',100,this.getCanvas().height - 50);
+    await this.renderImageURI('assets/like&subscribe.png', this.getCanvas().width / 2 - 100, this.getCanvas().height - 50);
     this.optons.forEach((option: any) => {
       if (option.rotateImage) {
-        this.drawRotate(true, option);
+        this.drawRotate(true, option, index);
       } else {
-        ctx?.drawImage(this.img, option.x, option.y, option.sw, option.sh);
+        ctx?.drawImage(this.imagesArray[index], option.x, option.y, option.sw, option.sh);
       }
     });
     this.addTextOnTop(this.textOnTop, this.fontSize, 'yellow');
     // this.addTextOnBottom(this.textOnBottom, this.fontSize, 'yellow');
-
   }
 
 
-  async renderImageURI(path:string,xpos:number,ypos:number) {
+  async renderImageURI(path: string, xpos: number, ypos: number) {
     const ctx = this.getContext();
     if (ctx) {
       let blob = await this.getImageBlob(path);
@@ -95,9 +98,9 @@ export class AppComponent extends EditorHelper implements AfterViewInit {
 
     }
   }
-  
 
-  drawRotate(clockwise: boolean = true, option: any) {
+
+  drawRotate(clockwise: boolean = true, option: any, index: number) {
     const degrees = clockwise == true ? 90 : -90;
     let canvas = this.gethiddenCanvas();
 
@@ -108,7 +111,7 @@ export class AppComponent extends EditorHelper implements AfterViewInit {
 
     ctx?.rotate(Math.PI);
     ctx?.drawImage(
-      this.img,
+      this.imagesArray[index],
       -this.imageBloackSize,
       -this.imageBloackSize,
       option.sw,
@@ -155,7 +158,7 @@ export class AppComponent extends EditorHelper implements AfterViewInit {
       // this.audiopath1,
       this.audiopath2,
       this.audiopath4,
-      )
+    )
 
     const outputStream = new MediaStream();
     outputStream.addTrack(videoStream.getVideoTracks()[0]);
@@ -168,6 +171,8 @@ export class AppComponent extends EditorHelper implements AfterViewInit {
     const mediaRecorder = new MediaRecorder(outputStream);
 
     mediaRecorder.onstop = (e) => {
+
+      if (!this.downloadEnable) { return }
 
       var blob = new Blob(this.chunks, { type: 'video/mp4' });
       this.chunks = [];
@@ -202,20 +207,23 @@ export class AppComponent extends EditorHelper implements AfterViewInit {
     }, 1000);
   }
 
-  startRecording(time = this.videoTime * 1000) {
+  startRecording(time = (this.videoTime * 1000) * this.imagesArray.length) {
     const { mediaRecorder, audioSrc } = this.getMdeiaStreeam(time);
     audioSrc.forEach(v => v.play());
 
 
-    // setTimeout(() => this.renderTick(), 300);
-    // setTimeout(() => this.startTimer(), 3000);
-    // setInterval(() => this.getContext()?.fillRect(0, 0, 0,0), 100);
-    // setInterval(() => this.getContext()?.clearRect(0, 0, 100, 50), 100);
-    setInterval(() => this.renderImage(), 300);
-    // setTimeout(() => {
-    //   this.drawCircle(this.getContext(), this.rotatedOptionLocation.x + (this.imageBloackSize / 2),
-    //     this.rotatedOptionLocation.y + (this.imageBloackSize / 2), this.imageBloackSize/1.2, 'transparent', 'black', 5);
-    // }, 10000);
+    let intervalId: any;
+    // let index: number = 0;
+    this.imagesArray.forEach((img: any, index: number) => {
+      setTimeout(() => {
+        this.optons = this.generateOptions();
+        console.log('index imagesArray ' + index)
+        clearInterval(intervalId);
+        intervalId = setInterval(() => { console.log('indexrender ' + index); this.renderImage(index) }, 300);
+      }, (this.videoTime * 1000) * (index))
+    })
+
+    
     mediaRecorder.start();
 
     setTimeout(() => {
@@ -244,11 +252,12 @@ export class AppComponent extends EditorHelper implements AfterViewInit {
   ) {
     const options = [];
     let count = 0;
-    let widthCount = Math.floor(gridWidth / imageBloackSize)-1;
-    let widthOfset = 10;
+    let widthCount = Math.floor(gridWidth / imageBloackSize) - 2;
+    let widthOfset = imageBloackSize;
+    let heightOfset = imageBloackSize;
     let heightCount = Math.floor(
       (gridHeight - this.textBloackSize * 2) / imageBloackSize
-    )-1;
+    );
     const randomImageNumber = this.randomIntFromInterval(
       1,
       widthCount * heightCount
@@ -257,7 +266,7 @@ export class AppComponent extends EditorHelper implements AfterViewInit {
     console.log('widthCount' + widthCount);
     console.log('heightCount' + heightCount);
     let xPosition = widthOfset;
-    let yPosition = imageBloackSize - widthOfset+40;
+    let yPosition = heightOfset;
     for (let height = 0; height < heightCount; height++) {
       for (let width = 0; width < widthCount; width++) {
         count += 1;

@@ -38,6 +38,20 @@ export class EditorHelper {
     }
 
 
+    renderTick() {
+        const context = this.getContext();
+        if (context) {
+            context.clearRect(0, 0, 100, 50);
+            context.font = "30px calibri";
+            context.fillStyle = "#222";
+            context.fillRect(
+                0, 0, 100, 50
+              );
+            context.fillStyle = "red";
+            context.fillText(''.toString(), 50, 45);
+        }
+    }
+
     getClock(time:number) {
         if(!time === undefined){
             return;
@@ -79,4 +93,25 @@ export class EditorHelper {
             curTime += "" + sec.toString();
         return curTime;
     }
+
+
+     getImageBlob = (url:string)=>{
+        return new Promise( async resolve=>{
+          let resposne = await fetch( url );
+          let blob = resposne.blob();
+          resolve( blob );
+        });
+      };
+      
+      // convert a blob to base64
+      blobToBase64 = (blob:any) => {
+        return new Promise<string | ArrayBuffer | null>( resolve=>{
+          let reader = new FileReader();
+          reader.onload = function() {
+            let dataUrl = reader.result;
+            resolve(dataUrl);
+          };
+          reader.readAsDataURL(blob);
+        });
+      }
 }
