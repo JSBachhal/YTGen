@@ -34,10 +34,6 @@ export class DesktopViewComponent extends EditorHelper implements AfterViewInit 
     }
   }
 
-
-  imagesArray: any[] = [];
-  oddImagesArray: any[] = [];
-  rotatedImage!: any;
   // Here, I created a function to draw image.
   async onFileSelected(e: any) {
     this.optons = this.generateOptions();
@@ -50,7 +46,7 @@ export class DesktopViewComponent extends EditorHelper implements AfterViewInit 
 
       const img = new Image();
       img.onload = async () => {
-        this.imagesArray[index] = img;
+        this.imagesArray[index] =  {img:img,imgWidth:img.width,imgHeigh:img.height};
          this.getOddImage(index);
         await this.renderImage(index);
       };
@@ -71,9 +67,9 @@ export class DesktopViewComponent extends EditorHelper implements AfterViewInit 
     this.optons.forEach((option: any) => {
       if (option.rotateImage) {
         // this.drawRotate(true, option, index);
-        ctx?.drawImage(this.oddImagesArray[index], option.x, option.y, option.sw, option.sh);
+        ctx?.drawImage(this.oddImagesArray[index].img, option.x, option.y, option.sw, option.sh);
       } else {
-        ctx?.drawImage(this.imagesArray[index], option.x, option.y, option.sw, option.sh);
+        ctx?.drawImage(this.imagesArray[index].img, option.x, option.y, option.sw, option.sh);
       }
     });
     this.addTextOnTop(this.textOnTop, this.fontSize, 'yellow');
@@ -112,7 +108,7 @@ export class DesktopViewComponent extends EditorHelper implements AfterViewInit 
 
     ctx?.rotate(Math.PI);
     ctx?.drawImage(
-      this.imagesArray[index],
+      this.imagesArray[index].img,
       -this.imageBloackSize,
       -this.imageBloackSize,
       option.sw,

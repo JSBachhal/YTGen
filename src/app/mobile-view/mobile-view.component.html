@@ -6,7 +6,12 @@
         <button (click)="startRecording()">Start Recording</button>
       </div>
       <div>
+        <label>Input Images</label>
         <input type="file" class="file-input" (change)="onFileSelected($event)" #fileUpload />
+      </div>
+      <div>
+        <label>Odd Images</label>
+        <input type="file" class="file-input" (change)="onOddFileSelected($event)" #fileUpload />
       </div>
       <div>
         <a [routerLink]="['/desktopView']">Desktop View</a>
@@ -22,47 +27,76 @@
   </div>
 
   <br />
-  <section class="flex">
-    <section>
-      <canvas hidden id="hiddenCanvas" [width]="50" [height]="50" #hiddenCanvas></canvas>
-      <canvas id="my-canvas" [width]="canvasWidth" [height]="canvasHeight" #myCanvas></canvas>
+  <section>
+    <div class="flex">
 
-    </section>
+      <section>
+        <canvas hidden id="hiddenCanvas" [width]="50" [height]="50" #hiddenCanvas></canvas>
+        <canvas id="my-canvas" [width]="canvasWidth" [height]="canvasHeight" #myCanvas></canvas>
 
-    <section class="flex">
-      <div class="">
-        <div>
-          <label>Width</label>
-          <input placeholder="Width" [(ngModel)]="canvasWidth" />
-        </div>
-        <div>
-          <label>Height</label>
-          <input placeholder="height" [(ngModel)]="canvasHeight" />
-        </div>
-        <div>
-          <label>Video Time</label>
-          <input placeholder="videoTime" [(ngModel)]="videoTime" />
-        </div>
-        <div>
-          <label>Image Block Size</label>
-          <input placeholder="imageBloackSize" [(ngModel)]="imageBloackSize" />
-        </div>
-      </div>
+      </section>
 
-      <div class="">
-        <div>
-          <label>Font Size</label>
-          <input placeholder="fontSize" [(ngModel)]="fontSize" />
+      <section>
+
+        <div class="flex">
+
+          <div class="">
+            <div>
+              <label>Width</label>
+              <input placeholder="Width" [(ngModel)]="canvasWidth" />
+            </div>
+            <div>
+              <label>Height</label>
+              <input placeholder="height" [(ngModel)]="canvasHeight" />
+            </div>
+            <div>
+              <label>Video Time</label>
+              <input placeholder="videoTime" [(ngModel)]="videoTime" />
+            </div>
+            <div>
+              <label>Image Block Size</label>
+              <input placeholder="imageBloackSize" [(ngModel)]="imageBloackSize" />
+            </div>
+          </div>
+
+          <div class="">
+            <div>
+              <label>Font Size</label>
+              <input placeholder="fontSize" [(ngModel)]="fontSize" />
+            </div>
+            <div>
+              <label>Text On Top</label>
+              <input placeholder="textOnTop" [(ngModel)]="textOnTop" />
+            </div>
+            <div>
+              <label>Text On Bottom</label>
+              <input placeholder="textOnBottom" [(ngModel)]="textOnBottom" />
+            </div>
+          </div>
         </div>
-        <div>
-          <label>Text On Top</label>
-          <input placeholder="textOnTop" [(ngModel)]="textOnTop" />
+
+        <div class="">
+          <div *ngFor="let img of imagesArray;let index=index;">
+            <div class="flex" style="margin-bottom: 1rem;">
+              <div style="padding-right: .5rem;">
+                <label>Main</label>
+                <img [src]="img.img.src" width="50" height="50">
+              </div>
+              <div style="padding-left: .5rem;" *ngIf="oddImagesArray.length">
+                <label>Odd at {{rotatedOptionLocation}}</label>
+                <img [src]="oddImagesArray[index].img.src" width="50" height="50">
+              </div>
+
+
+            </div>
+
+          </div>
         </div>
-        <div>
-          <label>Text On Bottom</label>
-          <input placeholder="textOnBottom" [(ngModel)]="textOnBottom" />
-        </div>
-      </div>
-    </section>
+      </section>
+    </div>
+
+
+
   </section>
+
 </section>

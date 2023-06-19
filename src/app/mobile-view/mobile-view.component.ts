@@ -36,20 +36,40 @@ export class MobileViewComponent extends EditorHelper implements AfterViewInit {
   }
 
 
-  imagesArray: any[] = [];
-  oddImagesArray: any[] = [];
   rotatedImage!: any;
+
 
   // Here, I created a function to draw image.
   async onFileSelected(e: any) {
+    this.clearCanvas();
+
     this.optons = this.generateOptions();
     const reader = new FileReader();
     const file = e.target.files[0];
     // load to image to get it's width/height
     const img = new Image();
     img.onload = async () => {
-      this.imagesArray[0] = img;
+      this.imagesArray[0] = { img: img, imgWidth: img.width, imgHeigh: img.height };
       this.getOddImage(0);
+      await this.renderImage(0);
+    };
+
+    // this is to setup loading the image
+    reader.onloadend = function () {
+      img.src = reader.result as any;
+    };
+    // this is to read the file
+    reader.readAsDataURL(file);
+  }
+
+  async onOddFileSelected(e: any) {
+    const reader = new FileReader();
+    const file = e.target.files[0];
+
+    const img = new Image();
+    img.onload = async () => {
+      this.oddImagesArray[0] = { img, imgWidth: img.width, imgHeigh: img.height };
+      // this.getOddImage(0);
       await this.renderImage(0);
     };
 
@@ -68,9 +88,9 @@ export class MobileViewComponent extends EditorHelper implements AfterViewInit {
     await this.renderImageURI('assets/subscribe.png', 100, this.getCanvas().height - 50);
     this.optons.forEach((option: any) => {
       if (option.rotateImage) {
-        ctx?.drawImage(this.oddImagesArray[index], option.x, option.y, option.sw, option.sh);
+        ctx?.drawImage(this.oddImagesArray[index].img, option.x, option.y, option.sw, option.sh);
       } else {
-        ctx?.drawImage(this.imagesArray[index], option.x, option.y, option.sw, option.sh);
+        ctx?.drawImage(this.imagesArray[index].img, option.x, option.y, option.sw, option.sh);
       }
     });
     this.addTextOnTop(this.textOnTop, this.fontSize, 'yellow');
@@ -175,7 +195,7 @@ export class MobileViewComponent extends EditorHelper implements AfterViewInit {
     audioSrc.forEach(v => v.play());
 
     setInterval(() => this.renderImage(), 300);
-    
+
     mediaRecorder.start();
 
     setTimeout(() => {

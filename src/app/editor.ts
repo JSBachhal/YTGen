@@ -11,9 +11,9 @@ export abstract class EditorHelper {
     }
 
     // downloadEnable = true;
-fontName='Badaboom';
-// fontName='impact';
-// fontName='Impacted';
+    fontName = 'Badaboom';
+    // fontName='impact';
+    // fontName='Impacted';
     abstract canvasWidth: number;
     abstract canvasHeight: number;
     abstract imageBloackSize: number;
@@ -22,8 +22,8 @@ fontName='Badaboom';
     abstract videoTime: number;
 
     abstract fontSize: number;
-    abstract imagesArray: any[];
-    abstract oddImagesArray: any[];
+    imagesArray: { img: any, imgWidth: number, imgHeigh: number }[] = [];
+    oddImagesArray: { img: any, imgWidth: number, imgHeigh: number }[] = [];
     //   textOnTop = 'CAN YOU FIND THE ODD ONE OUT?';
     //   textOnBottom = 'SUBSCRIBE and LIKE ';
     //   audiopath1 = 'assets/audio1.mp3';
@@ -147,7 +147,7 @@ fontName='Badaboom';
         sw: number,
         sh: number,
         rotateImage: boolean,
-      };
+    };
 
     generateOptionsHelper(
         gridWidth = this.canvasWidth,
@@ -197,29 +197,33 @@ fontName='Badaboom';
         return options;
     }
 
-    getOddImage( index: number) {
+    getOddImage(index: number) {
         // const degrees = clockwise == true ? 90 : -90;
         let canvas = document.createElement('canvas');
         // let canvas = this.gethiddenCanvas();
-    
+
         canvas.width = this.imageBloackSize;
         canvas.height = this.imageBloackSize;
-    
+
         let ctx = canvas.getContext('2d');
-    
+
         ctx?.rotate(Math.PI);
         ctx?.drawImage(
-          this.imagesArray[index],
-          -this.imageBloackSize,
-          -this.imageBloackSize,
-          this.imageBloackSize,
-          this.imageBloackSize
+            this.imagesArray[index].img,
+            -this.imageBloackSize,
+            -this.imageBloackSize,
+            this.imageBloackSize,
+            this.imageBloackSize
         );
         const sourceImageData = canvas?.toDataURL();
-        const destinationImage = new Image();
-        destinationImage.onload = () => {
-          this.oddImagesArray[index]= destinationImage;
+        const img = new Image();
+        img.onload = () => {
+            this.oddImagesArray[index] = { img: img, imgWidth: img.width, imgHeigh: img.height };
         };
-        destinationImage.src = sourceImageData;
-      }
+        img.src = sourceImageData;
+    }
+
+    clearCanvas() {
+        this.getContext()?.clearRect(0, 0, this.getCanvas().width, this.getCanvas().height);
+    }
 }
