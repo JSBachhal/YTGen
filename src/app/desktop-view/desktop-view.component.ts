@@ -8,13 +8,9 @@ import { EditorHelper } from '../editor';
 })
 export class DesktopViewComponent extends EditorHelper implements AfterViewInit {
 
-  // @ViewChild('player', { static: true })
-  // player!: ElementRef<HTMLVideoElement>;
-
-
   downloadEnable = true;
-  canvasWidth = 3840;
-  canvasHeight = 2160;
+  canvasWidth = 1920 //3840;
+  canvasHeight = 1080 // 2160;
   imageBloackSize = 150;
   textBloackSize = 50;
 
@@ -40,12 +36,13 @@ export class DesktopViewComponent extends EditorHelper implements AfterViewInit 
 
 
   imagesArray: any[] = [];
+  oddImagesArray: any[] = [];
   rotatedImage!: any;
   // Here, I created a function to draw image.
   async onFileSelected(e: any) {
     this.optons = this.generateOptions();
     const files = e.target.files as FileList;
-    const fileList: any[] = []
+  
     for (let index = 0; index < files.length; index++) {
       const file = files[index];
 
@@ -54,7 +51,8 @@ export class DesktopViewComponent extends EditorHelper implements AfterViewInit 
       const img = new Image();
       img.onload = async () => {
         this.imagesArray[index] = img;
-        await this.renderImage(0);
+         this.getOddImage(index);
+        await this.renderImage(index);
       };
 
       reader.onloadend = function () {
@@ -69,10 +67,11 @@ export class DesktopViewComponent extends EditorHelper implements AfterViewInit 
   async renderImage(index: number) {
 
     const ctx = this.getContext();
-    await this.renderImageURI('assets/like&subscribe.png', this.getCanvas().width / 2 - 100, this.getCanvas().height - 50);
+    await this.renderImageURI('assets/like&subscribe.png', this.getCanvas().width / 2 - 200, this.getCanvas().height - 50);
     this.optons.forEach((option: any) => {
       if (option.rotateImage) {
-        this.drawRotate(true, option, index);
+        // this.drawRotate(true, option, index);
+        ctx?.drawImage(this.oddImagesArray[index], option.x, option.y, option.sw, option.sh);
       } else {
         ctx?.drawImage(this.imagesArray[index], option.x, option.y, option.sw, option.sh);
       }
@@ -99,6 +98,32 @@ export class DesktopViewComponent extends EditorHelper implements AfterViewInit 
     }
   }
 
+
+  getOddImage( index: number) {
+    // const degrees = clockwise == true ? 90 : -90;
+    let canvas = document.createElement('canvas');
+    // let canvas = this.gethiddenCanvas();
+
+    canvas.width = this.imageBloackSize;
+    canvas.height = this.imageBloackSize;
+
+    let ctx = canvas.getContext('2d');
+
+    ctx?.rotate(Math.PI);
+    ctx?.drawImage(
+      this.imagesArray[index],
+      -this.imageBloackSize,
+      -this.imageBloackSize,
+      this.imageBloackSize,
+      this.imageBloackSize
+    );
+    const sourceImageData = canvas?.toDataURL();
+    const destinationImage = new Image();
+    destinationImage.onload = () => {
+      this.oddImagesArray[index]= destinationImage;
+    };
+    destinationImage.src = sourceImageData;
+  }
 
   drawRotate(clockwise: boolean = true, option: any, index: number) {
     const degrees = clockwise == true ? 90 : -90;
@@ -251,18 +276,21 @@ export class DesktopViewComponent extends EditorHelper implements AfterViewInit 
     imageBloackSize = this.imageBloackSize
   ) {
     const options = [];
+    const imagePadding = 12 ;
+
     let count = 0;
-    let widthCount = Math.floor(gridWidth / imageBloackSize) - 2;
-    let widthOfset = imageBloackSize;
-    let heightOfset = imageBloackSize;
+    let widthCount = Math.floor(gridWidth / (imageBloackSize+imagePadding))-1;
+    let widthOfset = (gridWidth % imageBloackSize)+imagePadding;
+    let heightOfset = (imageBloackSize+imagePadding)/1.2;
     let heightCount = Math.floor(
-      (gridHeight - this.textBloackSize * 2) / imageBloackSize
+      (gridHeight / (imageBloackSize+imagePadding))-1
     );
+
     const randomImageNumber = this.randomIntFromInterval(
       1,
       widthCount * heightCount
     );
-    console.log(randomImageNumber);
+    console.log('randomImageNumber '+ randomImageNumber);
     console.log('widthCount' + widthCount);
     console.log('heightCount' + heightCount);
     let xPosition = widthOfset;
@@ -281,10 +309,10 @@ export class DesktopViewComponent extends EditorHelper implements AfterViewInit 
           this.rotatedOptionLocation = option;
         }
         options.push(option);
-        xPosition = xPosition + imageBloackSize;
+        xPosition = xPosition + imageBloackSize + imagePadding;
       }
       xPosition = widthOfset;
-      yPosition = yPosition + imageBloackSize;
+      yPosition = yPosition + imageBloackSize + imagePadding;
     }
 
     return options;
@@ -301,7 +329,7 @@ export class DesktopViewComponent extends EditorHelper implements AfterViewInit 
     }
     ctx.fillStyle = '#222';
 
-    ctx.font = fontSize.toString() + 'px monospace';
+    ctx.font = (fontSize +10).toString() + 'px monospace';
     ctx.textBaseline = 'middle';
     ctx.textAlign = 'center';
 

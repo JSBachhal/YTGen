@@ -1,15 +1,12 @@
-import { AfterViewInit, Component, ElementRef, ViewChild } from '@angular/core';
-import { EditorHelper } from './editor';
+import { AfterViewInit, Component } from '@angular/core';
+import { EditorHelper } from '../editor';
 
 @Component({
-  selector: 'app-mobileView',
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss']
+  selector: 'app-mobile-view',
+  templateUrl: './mobile-view.component.html',
+  styleUrls: ['./mobile-view.component.scss']
 })
-export class AppComponent extends EditorHelper implements AfterViewInit {
-
-  // @ViewChild('player', { static: true })
-  // player!: ElementRef<HTMLVideoElement>;
+export class MobileViewComponent extends EditorHelper implements AfterViewInit {
 
   downloadEnable = true;
 

@@ -1,24 +1,36 @@
 <section>
-    <header>desktopView</header>
-    <div>
-      <div class="flex">
-        <div>
-            <button (click)="startRecording()">Start Recording</button>
-        </div>
-        <div>
-            <input type="file" class="file-input" multiple (change)="onFileSelected($event)" #fileUpload />
-        </div>
-        <div>
-            <a [routerLink]="['/mobileView']">Mobile View</a> 
-        </div>
+  <header>JS Mobile View</header>
+  <div>
+    <div class="flex">
+      <div>
+        <button (click)="startRecording()">Start Recording</button>
+      </div>
+      <div>
+        <input type="file" class="file-input" (change)="onFileSelected($event)" #fileUpload />
+      </div>
+      <div>
+        <a [routerLink]="['/desktopView']">Desktop View</a>
         <div>
           <input #downloadEnableRef id="downloadEnable" type="checkbox" [checked]="downloadEnable"
             (change)="downloadEnable = downloadEnableRef.checked" />
-        
+
         </div>
       </div>
-  
-      <div class="flex">
+    </div>
+
+
+  </div>
+
+  <br />
+  <section class="flex">
+    <section>
+      <canvas hidden id="hiddenCanvas" [width]="50" [height]="50" #hiddenCanvas></canvas>
+      <canvas id="my-canvas" [width]="canvasWidth" [height]="canvasHeight" #myCanvas></canvas>
+
+    </section>
+
+    <section class="flex">
+      <div class="">
         <div>
           <label>Width</label>
           <input placeholder="Width" [(ngModel)]="canvasWidth" />
@@ -36,8 +48,8 @@
           <input placeholder="imageBloackSize" [(ngModel)]="imageBloackSize" />
         </div>
       </div>
-  
-      <div class="flex">
+
+      <div class="">
         <div>
           <label>Font Size</label>
           <input placeholder="fontSize" [(ngModel)]="fontSize" />
@@ -51,20 +63,6 @@
           <input placeholder="textOnBottom" [(ngModel)]="textOnBottom" />
         </div>
       </div>
-    </div>
-  
-    <br />
-    <section class="flex">
-      <section>
-        <canvas hidden id="hiddenCanvas" [width]="50" [height]="50" #hiddenCanvas></canvas>
-        <canvas id="my-canvas" [width]="canvasWidth" [height]="canvasHeight" #myCanvas></canvas>
-  
-      </section>
-  
-      <section>
-        <!-- <video  id="player" #player [width]="canvasWidth" [height]="canvasHeight" hidden controls></video> -->
-  
-      
-      </section>
     </section>
   </section>
+</section>
