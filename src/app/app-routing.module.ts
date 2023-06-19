@@ -4,10 +4,10 @@ import { DesktopViewComponent } from './desktop-view/desktop-view.component';
 import { MobileViewComponent } from './mobile-view/mobile-view.component';
 
 const routes: Routes = [
-  { path: '', redirectTo: 'home', pathMatch: 'full' },
+  { path: '', redirectTo: 'mobileView', pathMatch: 'full' },
   { path: 'mobileView', component: MobileViewComponent },
   { path: 'desktopView', component: DesktopViewComponent },
-  { path: '**', redirectTo: 'home' },
+  { path: '**', redirectTo: 'mobileView' },
 ];
 
 @NgModule({

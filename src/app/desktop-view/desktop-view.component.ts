@@ -99,31 +99,7 @@ export class DesktopViewComponent extends EditorHelper implements AfterViewInit 
   }
 
 
-  getOddImage( index: number) {
-    // const degrees = clockwise == true ? 90 : -90;
-    let canvas = document.createElement('canvas');
-    // let canvas = this.gethiddenCanvas();
-
-    canvas.width = this.imageBloackSize;
-    canvas.height = this.imageBloackSize;
-
-    let ctx = canvas.getContext('2d');
-
-    ctx?.rotate(Math.PI);
-    ctx?.drawImage(
-      this.imagesArray[index],
-      -this.imageBloackSize,
-      -this.imageBloackSize,
-      this.imageBloackSize,
-      this.imageBloackSize
-    );
-    const sourceImageData = canvas?.toDataURL();
-    const destinationImage = new Image();
-    destinationImage.onload = () => {
-      this.oddImagesArray[index]= destinationImage;
-    };
-    destinationImage.src = sourceImageData;
-  }
+  
 
   drawRotate(clockwise: boolean = true, option: any, index: number) {
     const degrees = clockwise == true ? 90 : -90;
@@ -258,18 +234,7 @@ export class DesktopViewComponent extends EditorHelper implements AfterViewInit 
     }, time);
   }
 
-  randomIntFromInterval(min: number, max: number) {
-    // min and max included
-    return Math.floor(Math.random() * (max - min + 1) + min);
-  }
 
-  rotatedOptionLocation!: {
-    x: number,
-    y: number,
-    sw: number,
-    sh: number,
-    rotateImage: boolean,
-  };
   generateOptions(
     gridWidth = this.canvasWidth,
     gridHeight = this.canvasHeight,
@@ -329,7 +294,7 @@ export class DesktopViewComponent extends EditorHelper implements AfterViewInit 
     }
     ctx.fillStyle = '#222';
 
-    ctx.font = (fontSize +10).toString() + 'px monospace';
+    ctx.font = (fontSize +10).toString() + `px ${this.fontName}`;
     ctx.textBaseline = 'middle';
     ctx.textAlign = 'center';
 
@@ -349,7 +314,7 @@ export class DesktopViewComponent extends EditorHelper implements AfterViewInit 
     }
     ctx.fillStyle = '#222';
 
-    ctx.font = fontSize.toString() + 'px monospace';
+    ctx.font = fontSize.toString() + `px ${this.fontName}`;
     ctx.textBaseline = 'bottom';
     ctx.textAlign = 'center';
 

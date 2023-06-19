@@ -36,8 +36,10 @@ export class MobileViewComponent extends EditorHelper implements AfterViewInit {
   }
 
 
-  img!: any;
+  imagesArray: any[] = [];
+  oddImagesArray: any[] = [];
   rotatedImage!: any;
+
   // Here, I created a function to draw image.
   async onFileSelected(e: any) {
     this.optons = this.generateOptions();
@@ -46,8 +48,9 @@ export class MobileViewComponent extends EditorHelper implements AfterViewInit {
     // load to image to get it's width/height
     const img = new Image();
     img.onload = async () => {
-      this.img = img;
-      await this.renderImage();
+      this.imagesArray[0] = img;
+      this.getOddImage(0);
+      await this.renderImage(0);
     };
 
     // this is to setup loading the image
@@ -59,15 +62,15 @@ export class MobileViewComponent extends EditorHelper implements AfterViewInit {
   }
 
   optons: any = [];
-  async renderImage() {
+  async renderImage(index: number = 0) {
     const ctx = this.getContext();
-    await this.renderImageURI('assets/like.png',this.getCanvas().width - 80,300);
-    await this.renderImageURI('assets/subscribe.png',100,this.getCanvas().height - 50);
+    await this.renderImageURI('assets/like.png', this.getCanvas().width - 80, 300);
+    await this.renderImageURI('assets/subscribe.png', 100, this.getCanvas().height - 50);
     this.optons.forEach((option: any) => {
       if (option.rotateImage) {
-        this.drawRotate(true, option);
+        ctx?.drawImage(this.oddImagesArray[index], option.x, option.y, option.sw, option.sh);
       } else {
-        ctx?.drawImage(this.img, option.x, option.y, option.sw, option.sh);
+        ctx?.drawImage(this.imagesArray[index], option.x, option.y, option.sw, option.sh);
       }
     });
     this.addTextOnTop(this.textOnTop, this.fontSize, 'yellow');
@@ -76,7 +79,7 @@ export class MobileViewComponent extends EditorHelper implements AfterViewInit {
   }
 
 
-  async renderImageURI(path:string,xpos:number,ypos:number) {
+  async renderImageURI(path: string, xpos: number, ypos: number) {
     const ctx = this.getContext();
     if (ctx) {
       let blob = await this.getImageBlob(path);
@@ -91,38 +94,6 @@ export class MobileViewComponent extends EditorHelper implements AfterViewInit {
 
 
     }
-  }
-  
-
-  drawRotate(clockwise: boolean = true, option: any) {
-    const degrees = clockwise == true ? 90 : -90;
-    let canvas = this.gethiddenCanvas();
-
-    canvas.width = this.imageBloackSize;
-    canvas.height = this.imageBloackSize;
-
-    let ctx = canvas.getContext('2d');
-
-    ctx?.rotate(Math.PI);
-    ctx?.drawImage(
-      this.img,
-      -this.imageBloackSize,
-      -this.imageBloackSize,
-      option.sw,
-      option.sh
-    );
-    const sourceImageData = canvas?.toDataURL();
-    const destinationImage = new Image();
-    destinationImage.onload = () => {
-      this.getContext()?.drawImage(
-        destinationImage,
-        option.x,
-        option.y,
-        option.sw,
-        option.sh
-      );
-    };
-    destinationImage.src = sourceImageData;
   }
 
   addAudioTracks(...audioPaths: string[]) {
@@ -152,7 +123,7 @@ export class MobileViewComponent extends EditorHelper implements AfterViewInit {
       // this.audiopath1,
       this.audiopath2,
       this.audiopath4,
-      )
+    )
 
     const outputStream = new MediaStream();
     outputStream.addTrack(videoStream.getVideoTracks()[0]);
@@ -203,16 +174,8 @@ export class MobileViewComponent extends EditorHelper implements AfterViewInit {
     const { mediaRecorder, audioSrc } = this.getMdeiaStreeam(time);
     audioSrc.forEach(v => v.play());
 
-
-    // setTimeout(() => this.renderTick(), 300);
-    // setTimeout(() => this.startTimer(), 3000);
-    // setInterval(() => this.getContext()?.fillRect(0, 0, 0,0), 100);
-    // setInterval(() => this.getContext()?.clearRect(0, 0, 100, 50), 100);
     setInterval(() => this.renderImage(), 300);
-    // setTimeout(() => {
-    //   this.drawCircle(this.getContext(), this.rotatedOptionLocation.x + (this.imageBloackSize / 2),
-    //     this.rotatedOptionLocation.y + (this.imageBloackSize / 2), this.imageBloackSize/1.2, 'transparent', 'black', 5);
-    // }, 10000);
+    
     mediaRecorder.start();
 
     setTimeout(() => {
@@ -222,30 +185,28 @@ export class MobileViewComponent extends EditorHelper implements AfterViewInit {
     }, time);
   }
 
-  randomIntFromInterval(min: number, max: number) {
-    // min and max included
-    return Math.floor(Math.random() * (max - min + 1) + min);
-  }
 
-  rotatedOptionLocation!: {
-    x: number,
-    y: number,
-    sw: number,
-    sh: number,
-    rotateImage: boolean,
-  };
+
   generateOptions(
     gridWidth = this.canvasWidth,
     gridHeight = this.canvasHeight,
     imageBloackSize = this.imageBloackSize
   ) {
+
+    const superOptions = super.generateOptionsHelper(
+      gridWidth,
+      gridHeight,
+      imageBloackSize, 15);
+
+    return superOptions;
+
     const options = [];
     let count = 0;
-    let widthCount = Math.floor(gridWidth / imageBloackSize)-1;
+    let widthCount = Math.floor(gridWidth / imageBloackSize) - 1;
     let widthOfset = 10;
     let heightCount = Math.floor(
       (gridHeight - this.textBloackSize * 2) / imageBloackSize
-    )-1;
+    ) - 1;
     const randomImageNumber = this.randomIntFromInterval(
       1,
       widthCount * heightCount
@@ -254,7 +215,7 @@ export class MobileViewComponent extends EditorHelper implements AfterViewInit {
     console.log('widthCount' + widthCount);
     console.log('heightCount' + heightCount);
     let xPosition = widthOfset;
-    let yPosition = imageBloackSize - widthOfset+40;
+    let yPosition = imageBloackSize - widthOfset + 40;
     for (let height = 0; height < heightCount; height++) {
       for (let width = 0; width < widthCount; width++) {
         count += 1;
@@ -289,7 +250,7 @@ export class MobileViewComponent extends EditorHelper implements AfterViewInit {
     }
     ctx.fillStyle = '#222';
 
-    ctx.font = fontSize.toString() + 'px monospace';
+    ctx.font = fontSize.toString() + `px ${this.fontName}`;
     ctx.textBaseline = 'middle';
     ctx.textAlign = 'center';
 
@@ -309,7 +270,7 @@ export class MobileViewComponent extends EditorHelper implements AfterViewInit {
     }
     ctx.fillStyle = '#222';
 
-    ctx.font = fontSize.toString() + 'px monospace';
+    ctx.font = fontSize.toString() + `px ${this.fontName}`;
     ctx.textBaseline = 'bottom';
     ctx.textAlign = 'center';
 
