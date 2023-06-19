@@ -31,7 +31,7 @@
     <div class="flex">
 
       <section>
-        <canvas hidden id="hiddenCanvas" [width]="50" [height]="50" #hiddenCanvas></canvas>
+        <!-- <canvas hidden id="hiddenCanvas" [width]="50" [height]="50" #hiddenCanvas></canvas> -->
         <canvas id="my-canvas" [width]="canvasWidth" [height]="canvasHeight" #myCanvas></canvas>
 
       </section>
@@ -83,7 +83,7 @@
                 <img [src]="img.img.src" width="50" height="50">
               </div>
               <div style="padding-left: .5rem;" *ngIf="oddImagesArray.length">
-                <label>Odd at {{rotatedOptionLocation}}</label>
+                <label>Odd at {{randomLocation}}</label>
                 <img [src]="oddImagesArray[index].img.src" width="50" height="50">
               </div>
 

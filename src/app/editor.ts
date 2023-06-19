@@ -4,11 +4,10 @@ import { ViewChild, ElementRef, Directive } from "@angular/core";
 export abstract class EditorHelper {
     @ViewChild('myCanvas', { static: true })
     myCanvas!: ElementRef<HTMLCanvasElement>;
-    @ViewChild('hiddenCanvas', { static: true })
-    hiddenCanvas!: ElementRef<HTMLCanvasElement>;
-    constructor() {
+    // @ViewChild('hiddenCanvas', { static: true })
+    // hiddenCanvas!: ElementRef<HTMLCanvasElement>;
 
-    }
+    constructor() {}
 
     // downloadEnable = true;
     fontName = 'Badaboom';
@@ -31,18 +30,18 @@ export abstract class EditorHelper {
     //   audiopath3 = 'assets/audio3.mp3';
     //   audiopath4 = 'assets/audio4.mp3';
 
-    gethiddenCanvas() {
-        return this.hiddenCanvas.nativeElement;
-    }
+    // gethiddenCanvas() {
+    //     return this.hiddenCanvas.nativeElement;
+    // }
     getCanvas() {
         return this.myCanvas.nativeElement;
     }
     getContext() {
         return this.myCanvas.nativeElement.getContext('2d');
     }
-    gethiddenCanvasContext() {
-        return this.hiddenCanvas.nativeElement.getContext('2d');
-    }
+    // gethiddenCanvasContext() {
+    //     return this.hiddenCanvas.nativeElement.getContext('2d');
+    // }
 
     drawCircle(ctx: any, x: number, y: number, radius: number, fill: string, stroke: string, strokeWidth: number) {
         ctx.beginPath()
@@ -136,9 +135,12 @@ export abstract class EditorHelper {
         });
     }
 
+    randomLocation!: number;
+
     randomIntFromInterval(min: number, max: number) {
         // min and max included
-        return Math.floor(Math.random() * (max - min + 1) + min);
+        this.randomLocation = Math.floor(Math.random() * (max - min + 1) + min);
+        return this.randomLocation;
     }
 
     rotatedOptionLocation!: {
@@ -169,6 +171,7 @@ export abstract class EditorHelper {
             1,
             widthCount * heightCount
         );
+        ;
         console.log('randomImageNumber ' + randomImageNumber);
         console.log('widthCount' + widthCount);
         console.log('heightCount' + heightCount);

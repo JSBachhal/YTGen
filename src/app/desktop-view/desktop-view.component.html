@@ -56,13 +56,29 @@
     <br />
     <section class="flex">
       <section>
-        <canvas hidden id="hiddenCanvas" [width]="50" [height]="50" #hiddenCanvas></canvas>
+        <!-- <canvas hidden id="hiddenCanvas" [width]="50" [height]="50" #hiddenCanvas></canvas> -->
         <canvas id="my-canvas" [width]="canvasWidth" [height]="canvasHeight" #myCanvas></canvas>
   
       </section>
   
       <section>
-        <!-- <video  id="player" #player [width]="canvasWidth" [height]="canvasHeight" hidden controls></video> -->
+        <div class="">
+          <div *ngFor="let img of imagesArray;let index=index;">
+            <div class="flex" style="margin-bottom: 1rem;">
+              <div style="padding-right: .5rem;">
+                <label>Main</label>
+                <img [src]="img.img.src" width="50" height="50">
+              </div>
+              <div style="padding-left: .5rem;" *ngIf="oddImagesArray.length">
+                <label>Odd at {{randomLocation}}</label>
+                <img [src]="oddImagesArray[index].img.src" width="50" height="50">
+              </div>
+
+
+            </div>
+
+          </div>
+        </div>
   
       
       </section>

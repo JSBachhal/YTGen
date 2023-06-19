@@ -48,6 +48,7 @@ export class DesktopViewComponent extends EditorHelper implements AfterViewInit 
       img.onload = async () => {
         this.imagesArray[index] =  {img:img,imgWidth:img.width,imgHeigh:img.height};
          this.getOddImage(index);
+         this.clearCanvas();
         await this.renderImage(index);
       };
 
@@ -66,7 +67,6 @@ export class DesktopViewComponent extends EditorHelper implements AfterViewInit 
     await this.renderImageURI('assets/like&subscribe.png', this.getCanvas().width / 2 - 200, this.getCanvas().height - 50);
     this.optons.forEach((option: any) => {
       if (option.rotateImage) {
-        // this.drawRotate(true, option, index);
         ctx?.drawImage(this.oddImagesArray[index].img, option.x, option.y, option.sw, option.sh);
       } else {
         ctx?.drawImage(this.imagesArray[index].img, option.x, option.y, option.sw, option.sh);
@@ -97,36 +97,36 @@ export class DesktopViewComponent extends EditorHelper implements AfterViewInit 
 
   
 
-  drawRotate(clockwise: boolean = true, option: any, index: number) {
-    const degrees = clockwise == true ? 90 : -90;
-    let canvas = this.gethiddenCanvas();
+  // drawRotate(clockwise: boolean = true, option: any, index: number) {
+  //   const degrees = clockwise == true ? 90 : -90;
+  //   let canvas = this.gethiddenCanvas();
 
-    canvas.width = this.imageBloackSize;
-    canvas.height = this.imageBloackSize;
+  //   canvas.width = this.imageBloackSize;
+  //   canvas.height = this.imageBloackSize;
 
-    let ctx = canvas.getContext('2d');
+  //   let ctx = canvas.getContext('2d');
 
-    ctx?.rotate(Math.PI);
-    ctx?.drawImage(
-      this.imagesArray[index].img,
-      -this.imageBloackSize,
-      -this.imageBloackSize,
-      option.sw,
-      option.sh
-    );
-    const sourceImageData = canvas?.toDataURL();
-    const destinationImage = new Image();
-    destinationImage.onload = () => {
-      this.getContext()?.drawImage(
-        destinationImage,
-        option.x,
-        option.y,
-        option.sw,
-        option.sh
-      );
-    };
-    destinationImage.src = sourceImageData;
-  }
+  //   ctx?.rotate(Math.PI);
+  //   ctx?.drawImage(
+  //     this.imagesArray[index].img,
+  //     -this.imageBloackSize,
+  //     -this.imageBloackSize,
+  //     option.sw,
+  //     option.sh
+  //   );
+  //   const sourceImageData = canvas?.toDataURL();
+  //   const destinationImage = new Image();
+  //   destinationImage.onload = () => {
+  //     this.getContext()?.drawImage(
+  //       destinationImage,
+  //       option.x,
+  //       option.y,
+  //       option.sw,
+  //       option.sh
+  //     );
+  //   };
+  //   destinationImage.src = sourceImageData;
+  // }
 
   addAudioTracks(...audioPaths: string[]) {
     const audioCtx = new AudioContext();
@@ -213,6 +213,7 @@ export class DesktopViewComponent extends EditorHelper implements AfterViewInit 
     // let index: number = 0;
     this.imagesArray.forEach((img: any, index: number) => {
       setTimeout(() => {
+        this.clearCanvas();
         this.optons = this.generateOptions();
         console.log('index imagesArray ' + index)
         clearInterval(intervalId);
