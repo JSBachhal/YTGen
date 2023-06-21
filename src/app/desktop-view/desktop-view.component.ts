@@ -1,6 +1,7 @@
 import { AfterViewInit, Component } from '@angular/core';
 import { EditorHelper } from '../editor';
 import { Animation } from '../animation';
+import { AudioModel, AudioSrcMapModel } from './model/audiomap.model';
 
 @Component({
   selector: 'app-desktop-view',
@@ -9,11 +10,11 @@ import { Animation } from '../animation';
 })
 export class DesktopViewComponent extends Animation implements AfterViewInit {
 
-  downloadEnable = true;
+  downloadEnable = true //true;
   canvasWidth = 1920 //1920 //3840;
   canvasHeight = 1080 // 1080 // 2160;
   imageBloackSize = 110;
-  padding=15;
+  padding = 15;
   textBloackSize = 50;
 
   videoTime = 11;
@@ -29,8 +30,10 @@ export class DesktopViewComponent extends Animation implements AfterViewInit {
   audiopath4 = 'assets/audio4.mp3';
 
   introAudio = 'assets/audio/introAudio.wav';
-  endAudio = 'assets/endAudio.mp3';
-  bgAudio = 'assets/audio/bgAudio.mp3';
+  backgroundAudio = 'assets/audio/backgroundAudio.mp3';
+  clockAudio = 'assets/audio/clock.wav';
+  endAudio = 'assets/audio/endAudio.wav';
+
 
   challangeStartAudio1 = 'assets/audio/challangeStartAudio1.wav';
   challangeStartAudio2 = 'assets/audio/challangeStartAudio2.wav';
@@ -45,23 +48,24 @@ export class DesktopViewComponent extends Animation implements AfterViewInit {
   challangeEndAudio5 = 'assets/audio/challangeEndAudio5.wav';
 
 
-  audioSrcMap = {
-    introAudio: { name: 'introAudio', path: this.introAudio, index: 1 },
-    endAudio: { name: 'endAudio', path: this.endAudio, index: 2 },
-    bgAudio: { name: 'bgAudio', path: this.bgAudio, index: 3 },
+  audioSrcMap: AudioSrcMapModel = {
+    introAudio: { name: 'introAudio', path: this.introAudio, index: 0 },
 
-    challangeStartAudio1: { name: 'challangeStartAudio1', path: this.challangeStartAudio1, index: 4 },
-    challangeStartAudio2: { name: 'challangeStartAudio2', path: this.challangeStartAudio2, index: 5 },
-    challangeStartAudio3: { name: 'challangeStartAudio3', path: this.challangeStartAudio3, index: 6 },
-    challangeStartAudio4: { name: 'challangeStartAudio4', path: this.challangeStartAudio4, index: 7 },
-    challangeStartAudio5: { name: 'challangeStartAudio5', path: this.challangeStartAudio5, index: 8 },
-    challangeEndAudio1: { name: 'challangeEndAudio1', path: this.challangeEndAudio1, index: 9 },
+    challangeStartAudio1: { name: 'challangeStartAudio1', path: this.challangeStartAudio1, index: 1 },
+    challangeStartAudio2: { name: 'challangeStartAudio2', path: this.challangeStartAudio2, index: 2 },
+    challangeStartAudio3: { name: 'challangeStartAudio3', path: this.challangeStartAudio3, index: 3 },
+    challangeStartAudio4: { name: 'challangeStartAudio4', path: this.challangeStartAudio4, index: 4 },
+    challangeStartAudio5: { name: 'challangeStartAudio5', path: this.challangeStartAudio5, index: 5 },
 
-    challangeEndAudio2: { name: 'challangeEndAudio2', path: this.challangeEndAudio2, index: 10 },
-    challangeEndAudio3: { name: 'challangeEndAudio3', path: this.challangeEndAudio3, index: 11 },
-    challangeEndAudio4: { name: 'challangeEndAudio4', path: this.challangeEndAudio4, index: 12 },
-    challangeEndAudio5: { name: 'challangeEndAudio5', path: this.challangeEndAudio5, index: 13 },
+    challangeEndAudio1: { name: 'challangeEndAudio1', path: this.challangeEndAudio1, index: 6 },
+    challangeEndAudio2: { name: 'challangeEndAudio2', path: this.challangeEndAudio2, index: 7 },
+    challangeEndAudio3: { name: 'challangeEndAudio3', path: this.challangeEndAudio3, index: 8 },
+    challangeEndAudio4: { name: 'challangeEndAudio4', path: this.challangeEndAudio4, index: 9 },
+    challangeEndAudio5: { name: 'challangeEndAudio5', path: this.challangeEndAudio5, index: 10 },
 
+    backgroundAudio: { name: 'backgroundAudio', path: this.backgroundAudio, index: 11, volume: 1 },
+    clockAudio: { name: 'clockAudio', path: this.clockAudio, index: 12 },
+    endAudio: { name: 'endAudio', path: this.endAudio, index: 13 },
   };
 
   constructor() { super() }
@@ -75,8 +79,9 @@ export class DesktopViewComponent extends Animation implements AfterViewInit {
     // await this.loadBGImage();
     this.bgImage = await this.loadImage('assets/BG4k4.webp', this.bgImage);
     this.createVirtualCanvas();
+    this.mediaRecorderOptions.audioBitsPerSecond = 8000000;
+    this.mediaRecorderOptions.videoBitsPerSecond = 8000000;
 
-    
   }
 
   bgImage: any;
@@ -101,7 +106,7 @@ export class DesktopViewComponent extends Animation implements AfterViewInit {
 
         await this.renderImage(index);
 
-       
+
       };
 
       reader.onloadend = () => {
@@ -113,12 +118,12 @@ export class DesktopViewComponent extends Animation implements AfterViewInit {
   }
 
   optons: any = [];
-   renderImage(index: number) {
+  renderImage(index: number) {
 
     const ctx = this.getContext();
     // render bg
     this.drawImage(this.bgImage);
-  
+
     // render like and Sub
     // await this.renderImageURI('assets/like&subscribe.png', this.getCanvas().width / 2 - 200, this.getCanvas().height - 50);
 
@@ -142,17 +147,22 @@ export class DesktopViewComponent extends Animation implements AfterViewInit {
   }
 
 
-  addAudioTracks(...audioPaths: string[]) {
+  addAudioTracks(audioPaths: AudioModel[]) {
     const audioCtx = new AudioContext();
+    // const volume = audioCtx.createGain();
     const destination = audioCtx.createMediaStreamDestination();
 
     const audioSrcs: any[] = [];
     audioPaths.forEach(v => {
-      const audioSrc = new Audio(v);
+      const audioSrc = new Audio(v.path);
       audioSrcs.push(audioSrc)
       const audioSource = audioCtx.createMediaElementSource(
         audioSrc
       );
+
+      // audioSource.connect(volume);
+      // volume.connect(destination);
+      // volume.gain.value = v.volume || 100;
       audioSource.connect(destination);
     })
 
@@ -169,29 +179,22 @@ export class DesktopViewComponent extends Animation implements AfterViewInit {
 
 
     const { audioTracks, audioSrcs } = this.addAudioTracks(
-      this.audioSrcMap.introAudio.path,
-      // startAudios
-      this.audioSrcMap.challangeStartAudio1.path,
-      this.audioSrcMap.challangeStartAudio2.path,
-      this.audioSrcMap.challangeStartAudio3.path,
-      this.audioSrcMap.challangeStartAudio4.path,
-      this.audioSrcMap.challangeStartAudio5.path,
-
-      // end auddios
-      this.audioSrcMap.challangeEndAudio1.path,
-      this.audioSrcMap.challangeEndAudio2.path,
-      this.audioSrcMap.challangeEndAudio3.path,
-      this.audioSrcMap.challangeEndAudio4.path,
-      this.audioSrcMap.challangeEndAudio5.path,
+      Object.values(this.audioSrcMap)
     )
+
+
     this.audioSrcs = audioSrcs;
 
     const outputStream = new MediaStream();
     // outputStream.addTrack(videoStream.getVideoTracks()[0]);
     outputStream.addTrack(VirtualVideoStream.getVideoTracks()[0]);
 
-    audioTracks.stream.getAudioTracks().forEach(v => {
+    audioTracks.stream.getAudioTracks().forEach((v, i) => {
+
+
       outputStream.addTrack(v);
+
+
     })
 
 
@@ -229,7 +232,7 @@ export class DesktopViewComponent extends Animation implements AfterViewInit {
     setInterval(() => {
       this.getClock(time);
       if (time <= 0) {
-        
+
       } else {
         time -= 1;
       }
@@ -259,58 +262,65 @@ export class DesktopViewComponent extends Animation implements AfterViewInit {
     // audioSrc.forEach(v => v.play());
 
 
-    
+
     this.clearCanvas();
     mediaRecorder.start();
 
     await this.createIntro(mediaRecorder);
 
-    this.recordAllFrames(0, this.imagesArray.length)
+
+    this.startAudioByIndex(11);
+    this.recordAllFrames(0, this.imagesArray.length);
 
   }
 
   startChallangeAudioIndex = 1;
   endChallangeAudioIndex = 7;
 
-  timerInterval:any;
+  timerInterval: any;
 
   recordAllFrames(currentIndex: number, totalIndex: number) {
     this.optons = this.generateOptions();
     this.startChallangeAudioIndex = this.randomIntFromInterval(1, 5);
     this.endChallangeAudioIndex = this.randomIntFromInterval(6, 10);
-   
+
     this.mediaRecorder.pause();
     this.clearCanvas();
 
     if (currentIndex < totalIndex) {
-    this.renderImage(currentIndex);
-    this.updateFrameData();
-    this.mediaRecorder.resume();
-    this.startAudioByIndex(this.startChallangeAudioIndex);
+      this.renderImage(currentIndex);
+      this.updateFrameData();
+      this.mediaRecorder.resume();
+      this.startAudioByIndex(this.startChallangeAudioIndex);
 
-    if(this.timerInterval){
-      clearInterval(this.timerInterval);
-    }
+      if (this.timerInterval) {
+        clearInterval(this.timerInterval);
+      }
 
 
-    let time = 10;
-    this.timerInterval = setInterval(()=>{
-      if(time<0){return}
-      this.drawTimer(time)
-      time = time-1;
-    },1000);
+      let time = 10;
+      this.timerInterval = setInterval(() => {
+        if (time < 0) { return }
+        this.drawTimer(time);
+        this.updateFrameData();
+        time = time - 1;
+      }, 1000);
+
+      this.startAudioByIndex(this.audioSrcMap.clockAudio.index);
 
       const showResultAfter = (this.videoTime * 1000);
       setTimeout(() => {
         const showNextItemAfter = 4500;
         this.renderResult(currentIndex, totalIndex, showNextItemAfter);
         this.updateFrameData();
+        //stop clock
+        this.stopAudioByIndex(this.audioSrcMap.clockAudio.index);
         this.startAudioByIndex(this.endChallangeAudioIndex)
       }, showResultAfter);
 
     } else {
-      this.stopRecording();
-      this.frameData = null;
+      this.renderEnding();
+      // this.frameData = null;
     }
 
   }
@@ -320,6 +330,45 @@ export class DesktopViewComponent extends Animation implements AfterViewInit {
     setTimeout(() => {
       this.recordAllFrames(currentIndex + 1, totalIndex);
     }, resultTime);
+  }
+
+  async renderEnding() {
+
+    this.mediaRecorder.pause();
+    const ctx = this.getContext();
+    // render bg
+    if (!ctx) { return }
+
+    this.mediaRecorder.resume();
+    this.startAudioByIndex(this.audioSrcMap.endAudio.index);
+
+    await this.awaitTextRender(["It's time for the results. Are you prepared?"], 40, 3000);
+
+    await this.awaitTextRender([
+      "0 - 15",
+      "focus on paying more attention to smaller details and practice your observation skills.",
+      "Over time, your results will significantly improve"], 40, 10000);
+    await this.awaitTextRender([
+      "16 - 30",
+      "You have keen eyes. Keep up the good work!"
+    ], 80, 6000);
+
+    await this.awaitTextRender([
+      "30 - 50",
+      "you possess the sharpest eyes. You can even spot the smallest details."], 60, 6000);
+
+    await this.awaitTextRender(["like and subscribe"], 100, 7000);
+    this.stopRecording();
+   
+
+  }
+
+  awaitTextRender(text: string[], fontSize: number, delay: number) {
+    return new Promise(res => {
+      this.insertIntroText(text, fontSize);
+      this.updateFrameData();
+      setTimeout(() =>res(true), delay)
+    });
   }
 
   stopRecording() {
@@ -362,14 +411,14 @@ export class DesktopViewComponent extends Animation implements AfterViewInit {
       setTimeout(async () => {
         this.stop();
 
-        this.insertIntroText('1 Correct Answer = 1 POINT');
+        this.insertIntroText(['1 Correct Answer = 1 POINT']);
         this.updateFrameData();
 
 
 
         setTimeout(() => {
 
-          this.insertIntroText('LEVEL 1');
+          this.insertIntroText(['LEVEL 1']);
           this.updateFrameData();
 
 
@@ -383,8 +432,8 @@ export class DesktopViewComponent extends Animation implements AfterViewInit {
   }
 
 
-  introVideo: HTMLVideoElement|null=null;
-  introVideoCanvas: HTMLCanvasElement|null=null;
+  introVideo: HTMLVideoElement | null = null;
+  introVideoCanvas: HTMLCanvasElement | null = null;
   videoWidth!: number;
   videoHeight!: number;
 
@@ -399,11 +448,11 @@ export class DesktopViewComponent extends Animation implements AfterViewInit {
 
     const introVideo = document.createElement('video');
     introVideo.src = 'assets/introvideo/introl brain.mp4';
-    
+
     introVideo.addEventListener("loadedmetadata", (e) => {
       this.videoWidth = 1920 // this.canvasWidth;
       this.videoHeight = 1080 // this.canvasHeight;
-      
+
     }, false);
 
     this.introVideo = introVideo;
@@ -426,7 +475,7 @@ export class DesktopViewComponent extends Animation implements AfterViewInit {
   stop() {
     this.introVideo?.pause();
     this.introVideo = null
-    this.introVideoCanvas= null;
+    this.introVideoCanvas = null;
   }
 
   async timerCallback() {
@@ -449,7 +498,7 @@ export class DesktopViewComponent extends Animation implements AfterViewInit {
 
   async computeFrame() {
     const ctx = this.introVideoCanvas?.getContext('2d', { willReadFrequently: true });
-   
+
     ctx?.drawImage(this.introVideo as any, 0, 0, this.canvasWidth, this.canvasHeight);
 
     // let frame = ctx?.getImageData(0, 0, this.videoWidth, this.videoHeight);
@@ -474,22 +523,25 @@ export class DesktopViewComponent extends Animation implements AfterViewInit {
   }
 
 
-  insertIntroText(text: string) {
+  insertIntroText(text: string[], fontSize = 150) {
     this.clearCanvas();
     this.drawImage(this.bgImage);
-    this.addText(text, 150, 'yellow', this.canvasWidth / 2, this.canvasHeight / 2);
+
+    text.forEach((text, index) => {
+      this.addText(text, fontSize, 'yellow', this.canvasWidth / 2, (this.canvasHeight / 2) + (index * (fontSize + 15)));
+    })
 
   }
 
-  drawTimer(time:number){
+  drawTimer(time: number) {
     this.drawCircle(
       20,
-       20,
-       25,
-       'yellow',
-       'red',
-       8
-     )
-     this.addText(time.toString(),40,'black',45,45)
+      20,
+      25,
+      'yellow',
+      'red',
+      8
+    )
+    this.addText(time.toString(), 40, 'black', 45, 45)
   }
 }
