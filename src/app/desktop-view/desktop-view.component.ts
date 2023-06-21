@@ -320,7 +320,7 @@ export class DesktopViewComponent extends Animation implements AfterViewInit {
 
     } else {
       this.renderEnding();
-      // this.frameData = null;
+
     }
 
   }
@@ -359,7 +359,7 @@ export class DesktopViewComponent extends Animation implements AfterViewInit {
 
     await this.awaitTextRender(["like and subscribe"], 100, 7000);
     this.stopRecording();
-   
+    this.frameData = null;
 
   }
 
@@ -367,7 +367,7 @@ export class DesktopViewComponent extends Animation implements AfterViewInit {
     return new Promise(res => {
       this.insertIntroText(text, fontSize);
       this.updateFrameData();
-      setTimeout(() =>res(true), delay)
+      setTimeout(() => res(true), delay)
     });
   }
 
