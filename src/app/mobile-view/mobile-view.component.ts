@@ -17,7 +17,7 @@ export class MobileViewComponent extends EditorHelper implements AfterViewInit {
 
   videoTime = 9;
 
-  fontSize = 30;
+  fontSize = 20;
   textOnTop = 'CAN YOU FIND THE ODD ONE OUT?';
   textOnBottom = 'SUBSCRIBE and LIKE ';
   audiopath1 = 'assets/audio1.mp3';
@@ -28,11 +28,7 @@ export class MobileViewComponent extends EditorHelper implements AfterViewInit {
   constructor() { super() }
 
   ngAfterViewInit() {
-    const ctx = this.getContext();
-    if (ctx) {
-      ctx.fillStyle = '#222';
-      ctx.fillRect(0, 0, this.getCanvas().width, this.getCanvas().height);
-    }
+    this.clearCanvas();
   }
 
 
@@ -84,8 +80,8 @@ export class MobileViewComponent extends EditorHelper implements AfterViewInit {
   optons: any = [];
   async renderImage(index: number = 0) {
     const ctx = this.getContext();
-    await this.renderImageURI('assets/like.png', this.getCanvas().width - 80, 300);
-    await this.renderImageURI('assets/subscribe.png', 100, this.getCanvas().height - 50);
+    await this.renderImageURI('assets/like.png', this.getCanvas().width - 80, 300,null);
+    await this.renderImageURI('assets/subscribe.png', 100, this.getCanvas().height - 50,null);
     this.optons.forEach((option: any) => {
       if (option.rotateImage) {
         ctx?.drawImage(this.oddImagesArray[index].img, option.x, option.y, option.sw, option.sh);
@@ -93,27 +89,8 @@ export class MobileViewComponent extends EditorHelper implements AfterViewInit {
         ctx?.drawImage(this.imagesArray[index].img, option.x, option.y, option.sw, option.sh);
       }
     });
-    this.addTextOnTop(this.textOnTop, this.fontSize, 'yellow');
-    // this.addTextOnBottom(this.textOnBottom, this.fontSize, 'yellow');
+    this.addText(this.textOnTop, this.fontSize, 'yellow');
 
-  }
-
-
-  async renderImageURI(path: string, xpos: number, ypos: number) {
-    const ctx = this.getContext();
-    if (ctx) {
-      let blob = await this.getImageBlob(path);
-      let base64 = await this.blobToBase64(blob);
-
-      const img = new Image();
-      img.onload = () => {
-        ctx.drawImage(img as any, xpos, ypos);
-
-      };
-      img.src = base64 as any;
-
-
-    }
   }
 
   addAudioTracks(...audioPaths: string[]) {
@@ -136,7 +113,7 @@ export class MobileViewComponent extends EditorHelper implements AfterViewInit {
 
   chunks: any = [];
   getMdeiaStreeam(time: number) {
-    const videoStream = this.getCanvas().captureStream(60);
+    const videoStream = this.getCanvas().captureStream();
 
 
     const { audioTracks, audioSrcs } = this.addAudioTracks(
@@ -153,11 +130,11 @@ export class MobileViewComponent extends EditorHelper implements AfterViewInit {
     })
 
 
-    const mediaRecorder = new MediaRecorder(outputStream);
+    const mediaRecorder = new MediaRecorder(outputStream,this.mediaRecorderOptions);
 
     mediaRecorder.onstop = (e) => {
 
-      var blob = new Blob(this.chunks, { type: 'video/mp4' });
+      var blob = new Blob(this.chunks, { type: 'video/webm' });
       this.chunks = [];
 
 
@@ -166,7 +143,7 @@ export class MobileViewComponent extends EditorHelper implements AfterViewInit {
       document.body.appendChild(a);
       (a.style as any) = 'display: none';
       a.href = url;
-      a.download = 'Can you Find It ? #shorts .mp4';
+      a.download = 'Can you Find It ? HIGHT IQ 99% Fail #shorts .webm';
       a.click();
       window.URL.revokeObjectURL(url);
     };
@@ -194,9 +171,14 @@ export class MobileViewComponent extends EditorHelper implements AfterViewInit {
     const { mediaRecorder, audioSrc } = this.getMdeiaStreeam(time);
     audioSrc.forEach(v => v.play());
 
+    this.clearCanvas();
+    this.renderImage();
     setInterval(() => this.renderImage(), 300);
-
     mediaRecorder.start();
+
+    
+    
+
 
     setTimeout(() => {
       mediaRecorder.stop();
@@ -220,43 +202,6 @@ export class MobileViewComponent extends EditorHelper implements AfterViewInit {
 
     return superOptions;
 
-    const options = [];
-    let count = 0;
-    let widthCount = Math.floor(gridWidth / imageBloackSize) - 1;
-    let widthOfset = 10;
-    let heightCount = Math.floor(
-      (gridHeight - this.textBloackSize * 2) / imageBloackSize
-    ) - 1;
-    const randomImageNumber = this.randomIntFromInterval(
-      1,
-      widthCount * heightCount
-    );
-    console.log(randomImageNumber);
-    console.log('widthCount' + widthCount);
-    console.log('heightCount' + heightCount);
-    let xPosition = widthOfset;
-    let yPosition = imageBloackSize - widthOfset + 40;
-    for (let height = 0; height < heightCount; height++) {
-      for (let width = 0; width < widthCount; width++) {
-        count += 1;
-        const option = {
-          x: xPosition,
-          y: yPosition,
-          sw: imageBloackSize,
-          sh: imageBloackSize,
-          rotateImage: count === randomImageNumber,
-        };
-        if (count === randomImageNumber) {
-          this.rotatedOptionLocation = option;
-        }
-        options.push(option);
-        xPosition = xPosition + imageBloackSize;
-      }
-      xPosition = widthOfset;
-      yPosition = yPosition + imageBloackSize;
-    }
-
-    return options;
   }
 
   addTextOnTop(

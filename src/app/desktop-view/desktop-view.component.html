@@ -3,6 +3,7 @@
     <div>
       <div class="flex">
         <div>
+            <button (click)="play()">Start intro</button>
             <button (click)="startRecording()">Start Recording</button>
         </div>
         <div>
@@ -57,7 +58,9 @@
     <section class="flex">
       <section>
         <!-- <canvas hidden id="hiddenCanvas" [width]="50" [height]="50" #hiddenCanvas></canvas> -->
-        <canvas id="my-canvas" [width]="canvasWidth" [height]="canvasHeight" #myCanvas></canvas>
+        <canvas id="my-canvas" class="my-canvas" [width]="canvasWidth" [height]="canvasHeight" #myCanvas></canvas>
+
+        <video #player hidden width="1024"  height="720" autoplay  controls></video>
   
       </section>
   
@@ -71,7 +74,7 @@
               </div>
               <div style="padding-left: .5rem;" *ngIf="oddImagesArray.length">
                 <label>Odd at {{randomLocation}}</label>
-                <img [src]="oddImagesArray[index].img.src" width="50" height="50">
+                <img *ngIf="oddImagesArray[index].img" [src]="oddImagesArray[index].img.src" width="50" height="50">
               </div>
 
 

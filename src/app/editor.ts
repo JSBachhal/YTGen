@@ -1,4 +1,5 @@
 import { ViewChild, ElementRef, Directive } from "@angular/core";
+import { async } from "@angular/core/testing";
 
 @Directive()
 export abstract class EditorHelper {
@@ -6,8 +7,10 @@ export abstract class EditorHelper {
     myCanvas!: ElementRef<HTMLCanvasElement>;
     // @ViewChild('hiddenCanvas', { static: true })
     // hiddenCanvas!: ElementRef<HTMLCanvasElement>;
+    @ViewChild('player', { static: true })
+    player!: ElementRef<HTMLVideoElement>;
 
-    constructor() {}
+    constructor() { }
 
     // downloadEnable = true;
     fontName = 'Badaboom';
@@ -30,32 +33,62 @@ export abstract class EditorHelper {
     //   audiopath3 = 'assets/audio3.mp3';
     //   audiopath4 = 'assets/audio4.mp3';
 
+    mediaRecorderOptions = {
+        audioBitsPerSecond: 1024 * 1024 * 200,
+        videoBitsPerSecond: 1024 * 1024 * 200,
+        mimeType: "video/webm",
+    };
+
+    frameData!: any;
+    getUpdatedFrameData() {
+        return this.frameData
+    }
+
+    virtualCanvas!:HTMLCanvasElement;
+    
+    createVirtualCanvas(){
+        this.virtualCanvas = document.createElement('canvas');
+        this.virtualCanvas.width = this.canvasWidth;
+        this.virtualCanvas.height = this.canvasHeight;
+        // document.body.appendChild(this.virtualCanvas)
+        this.updateVirtualCanvas();
+    }
+
+    getVirtualCanvasContext(){
+        return this.virtualCanvas.getContext('2d' , { willReadFrequently: true }) || {} as CanvasRenderingContext2D;
+    }
+
+    updateVirtualCanvas(){
+        // const frameData = this.getUpdatedFrameData();
+        if(this.frameData){
+            // this.getVirtualCanvasContext().drawImage(frameData as any,0,0);
+            this.getVirtualCanvasContext().putImageData(this.frameData,0,0);
+        }
+        requestAnimationFrame(()=>this.updateVirtualCanvas());
+    }
+
+    updateFrameData(){
+        const ctx = this.getContext();
+        if (!ctx) { return; }
+        // this.frameData = ctx.canvas.toDataURL();// getImageData(0,0,this.canvasWidth,this.canvasHeight);
+        this.frameData = ctx.getImageData(0,0,this.canvasWidth,this.canvasHeight);
+    }
+
     // gethiddenCanvas() {
     //     return this.hiddenCanvas.nativeElement;
     // }
     getCanvas() {
         return this.myCanvas.nativeElement;
     }
+
     getContext() {
-        return this.myCanvas.nativeElement.getContext('2d');
+        return this.myCanvas.nativeElement.getContext('2d', { willReadFrequently: true });
     }
     // gethiddenCanvasContext() {
     //     return this.hiddenCanvas.nativeElement.getContext('2d');
     // }
 
-    drawCircle(ctx: any, x: number, y: number, radius: number, fill: string, stroke: string, strokeWidth: number) {
-        ctx.beginPath()
-        ctx.arc(x, y, radius, 0, 2 * Math.PI, false)
-        if (fill) {
-            ctx.fillStyle = fill
-            ctx.fill()
-        }
-        if (stroke) {
-            ctx.lineWidth = strokeWidth
-            ctx.strokeStyle = stroke
-            ctx.stroke()
-        }
-    }
+
 
 
     renderTick() {
@@ -115,41 +148,26 @@ export abstract class EditorHelper {
     }
 
 
-    getImageBlob = (url: string) => {
-        return new Promise(async resolve => {
-            let resposne = await fetch(url);
-            let blob = resposne.blob();
-            resolve(blob);
-        });
-    };
 
-    // convert a blob to base64
-    blobToBase64 = (blob: any) => {
-        return new Promise<string | ArrayBuffer | null>(resolve => {
-            let reader = new FileReader();
-            reader.onload = function () {
-                let dataUrl = reader.result;
-                resolve(dataUrl);
-            };
-            reader.readAsDataURL(blob);
-        });
-    }
 
     randomLocation!: number;
 
     randomIntFromInterval(min: number, max: number) {
         // min and max included
-        this.randomLocation = Math.floor(Math.random() * (max - min + 1) + min);
-        return this.randomLocation;
+        const randomNumber = Math.floor(Math.random() * (max - min + 1) + min);
+        return randomNumber;
     }
 
-    rotatedOptionLocation!: {
+    OddImageLocation!: {
         x: number,
         y: number,
         sw: number,
         sh: number,
         rotateImage: boolean,
     };
+
+    widthOfset = 0;
+    heightOfset = 0;
 
     generateOptionsHelper(
         gridWidth = this.canvasWidth,
@@ -161,8 +179,15 @@ export abstract class EditorHelper {
 
         let count = 0;
         let widthCount = Math.floor(gridWidth / (imageBloackSize + imagePadding)) - 1;
-        let widthOfset = (gridWidth % imageBloackSize) + imagePadding;
-        let heightOfset = (imageBloackSize + imagePadding) / 1.2;
+        this.widthOfset = (gridWidth % imageBloackSize) + imagePadding;
+        let widthOfset = this.widthOfset;
+
+        this.heightOfset = (imageBloackSize + imagePadding) / 1.2;
+        let heightOfset = this.heightOfset;
+
+        console.log('widthOfset ' + widthOfset);
+        console.log('heightOfset ' + heightOfset);
+
         let heightCount = Math.floor(
             (gridHeight / (imageBloackSize + imagePadding)) - 1
         );
@@ -171,10 +196,10 @@ export abstract class EditorHelper {
             1,
             widthCount * heightCount
         );
-        ;
-        console.log('randomImageNumber ' + randomImageNumber);
-        console.log('widthCount' + widthCount);
-        console.log('heightCount' + heightCount);
+        this.randomLocation = randomImageNumber; 
+        // console.log('randomImageNumber ' + randomImageNumber);
+        // console.log('widthCount' + widthCount);
+        // console.log('heightCount' + heightCount);
         let xPosition = widthOfset;
         let yPosition = heightOfset;
         for (let height = 0; height < heightCount; height++) {
@@ -188,7 +213,7 @@ export abstract class EditorHelper {
                     rotateImage: count === randomImageNumber,
                 };
                 if (count === randomImageNumber) {
-                    this.rotatedOptionLocation = option;
+                    this.OddImageLocation = option;
                 }
                 options.push(option);
                 xPosition = xPosition + imageBloackSize + imagePadding;
@@ -201,6 +226,9 @@ export abstract class EditorHelper {
     }
 
     getOddImage(index: number) {
+
+        return new Promise<{ img: any, imgWidth: number, imgHeigh: number }>(res=>{
+
         // const degrees = clockwise == true ? 90 : -90;
         let canvas = document.createElement('canvas');
         // let canvas = this.gethiddenCanvas();
@@ -221,12 +249,146 @@ export abstract class EditorHelper {
         const sourceImageData = canvas?.toDataURL();
         const img = new Image();
         img.onload = () => {
-            this.oddImagesArray[index] = { img: img, imgWidth: img.width, imgHeigh: img.height };
+            // this.oddImagesArray[index] = { img: img, imgWidth: img.width, imgHeigh: img.height };
+            res({ img: img, imgWidth: img.width, imgHeigh: img.height })
         };
         img.src = sourceImageData;
+    })
+
     }
 
     clearCanvas() {
-        this.getContext()?.clearRect(0, 0, this.getCanvas().width, this.getCanvas().height);
+        const ctx = this.getContext();
+        if (!ctx) { return; }
+
+        ctx.clearRect(0, 0, this.getCanvas().width, this.getCanvas().height);
+        ctx.fillStyle = '#222';
+        ctx.fillRect(0, 0, this.getCanvas().width, this.getCanvas().height);
+    }
+
+
+    getImageBlob = (url: string) => {
+        return new Promise(async resolve => {
+            let resposne = await fetch(url);
+            let blob = resposne.blob();
+            resolve(blob);
+        });
+    };
+
+    // convert a blob to base64
+    blobToBase64 = (blob: any) => {
+        return new Promise<string | ArrayBuffer | null>(resolve => {
+            let reader = new FileReader();
+            reader.onload = () => {
+                let dataUrl = reader.result;
+                resolve(dataUrl);
+            };
+            reader.readAsDataURL(blob);
+        });
+    }
+
+    async renderImageURI(path: string, xpos: number, ypos: number, target: any, ctx = this.getContext()) {
+        return new Promise(async resolve => {
+            if (ctx) {
+                if (target) {
+                    ctx.drawImage(target as any, xpos, ypos);
+                    resolve(true);
+                }
+
+                let blob = await this.getImageBlob(path);
+                let base64 = await this.blobToBase64(blob);
+
+                const img = new Image();
+                img.onload = () => {
+                    if (target !== null) {
+                        target = img;
+                    }
+                    ctx.drawImage(img as any, xpos, ypos);
+                    resolve(true);
+                };
+                img.src = base64 as any;
+            }
+        });
+    }
+   
+    async loadImage(path: string, target: any,) {
+
+        return new Promise(async res => {
+
+            let blob = await this.getImageBlob(path);
+            let base64 = await this.blobToBase64(blob);
+
+            target = new Image();
+            target.onload = () => {
+                res(target);
+            };
+            target.src = base64 as any;
+        });
+    }
+
+    addText(
+        string: string,
+        fontSize: number = this.fontSize,
+        color: string,
+        xpos: number = this.getCanvas().width / 2,
+        ypos: number = fontSize
+    ) {
+        const ctx = this.getContext();
+        if (!ctx) {
+            return;
+        }
+        ctx.font = (fontSize + 10).toString() + `px ${this.fontName}`;
+        ctx.textBaseline = 'middle';
+        ctx.textAlign = 'center';
+
+        ctx.fillStyle = color;
+        ctx.fillText(string, xpos, ypos);
+    }
+
+    drawCircle(x: number, y: number, radius: number, fill: string, stroke: string, strokeWidth: number) {
+        const ctx = this.getContext();
+        if (!ctx) { return; }
+        ctx.beginPath()
+        ctx.arc(x + radius, y + radius, radius + 10, 0, 2 * Math.PI, false)
+        if (fill) {
+            ctx.fillStyle = fill
+            ctx.fill()
+        }
+        if (stroke) {
+            ctx.lineWidth = strokeWidth
+            ctx.strokeStyle = stroke
+            ctx.stroke()
+        }
+    }
+
+
+
+    typeOut(str: string, startX: number, startY: number, lineHeight: number, padding: number) {
+        var cursorX = startX || 0;
+        var cursorY = startY || 0;
+        var lineHeight = lineHeight || 32;
+        padding = padding || 10;
+        var i = 0;
+        const ctx = this.getContext();
+        if (!ctx) { return };
+        const _inter = setInterval(function () {
+            var w = ctx.measureText(str.charAt(i)).width;
+            if (cursorX + w >= ctx.canvas.width - padding) {
+                cursorX = startX;
+                cursorY += lineHeight;
+            }
+            ctx.fillText(str.charAt(i), cursorX, cursorY);
+            i++;
+            cursorX += w;
+            if (i === str.length) {
+                clearInterval(_inter);
+            }
+        }, 75);
+    }
+
+    drawImage(img: any,x: number =0,y: number=0 ){
+        const ctx = this.getContext();
+        if (!ctx) { return };
+        ctx.drawImage(img,x,y)
     }
 }
