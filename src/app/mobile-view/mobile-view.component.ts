@@ -9,6 +9,7 @@ import { EditorHelper } from '../editor';
 export class MobileViewComponent extends EditorHelper implements AfterViewInit {
 
   downloadEnable = true;
+  EnableAudio = true;
 
   canvasWidth = 1080;
   canvasHeight = 1920;
@@ -177,7 +178,9 @@ export class MobileViewComponent extends EditorHelper implements AfterViewInit {
 
   async startRecording(time = this.videoTime * 1000) {
     const { mediaRecorder, audioSrc } = this.getMdeiaStreeam();
-    audioSrc.forEach(v => v.play());
+    if(this.EnableAudio){
+      audioSrc.forEach(v => v.play());
+    }
 
     this.clearCanvas();
     this.mediaRecorder.start();
@@ -189,8 +192,9 @@ export class MobileViewComponent extends EditorHelper implements AfterViewInit {
 
     setTimeout(() => {
       this.mediaRecorder.stop();
+      if(this.EnableAudio){
       audioSrc.forEach(v => v.pause());
-
+      }
     }, time);
   }
 
