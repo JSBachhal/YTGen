@@ -2,18 +2,18 @@ import { AfterViewInit, Component } from '@angular/core';
 import { EditorHelper } from '../editor';
 
 @Component({
-  selector: 'app-mobile-view',
-  templateUrl: './mobile-view.component.html',
-  styleUrls: ['./mobile-view.component.scss']
+  selector: 'app-tumbnail-mobile',
+  templateUrl: './tumbnail-mobile.component.html',
+  styleUrls: ['./tumbnail-mobile.component.scss']
 })
-export class MobileViewComponent extends EditorHelper implements AfterViewInit {
+export class TumbnailMobileComponent  extends EditorHelper implements AfterViewInit {
 
   downloadEnable = true;
 
   canvasWidth = 1080;
-  canvasHeight = 1920;
-  imageBloackSize = 140;
-  textBloackSize = 70;
+  canvasHeight = 1920 ;
+  imageBloackSize = 195;
+  textBloackSize = 50;
 
   videoTime = 5;
 
@@ -84,10 +84,9 @@ export class MobileViewComponent extends EditorHelper implements AfterViewInit {
   optons: any = [];
   async renderImage(index: number = 0) {
     const ctx = this.getContext();
-    await this.renderImageURI('assets/like.png', this.getCanvas().width - 80, 300, null);
+    // await this.renderImageURI('assets/like.png', this.getCanvas().width - 80, 300, null);
     // await this.renderImageURI('assets/subscribe.png', 100, this.getCanvas().height - 50, null);
-    this.addText('Please Like And Subscribe',40,'yellow',this.canvasWidth/2,this.canvasHeight-50)
-
+    this.addText('Whats Your IQ',40,'yellow',this.canvasWidth/2,this.canvasHeight-50,'Impact')
     this.optons.forEach((option: any) => {
       if (option.rotateImage) {
         ctx?.drawImage(this.oddImagesArray[index].img, option.x, option.y, option.sw, option.sh);
@@ -205,7 +204,7 @@ export class MobileViewComponent extends EditorHelper implements AfterViewInit {
     const superOptions = super.generateOptionsHelper(
       gridWidth,
       gridHeight,
-      imageBloackSize, 15);
+      imageBloackSize, 12);
 
     return superOptions;
 

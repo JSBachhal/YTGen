@@ -8,13 +8,15 @@ import { DesktopViewComponent } from './desktop-view/desktop-view.component';
 import { RootComponent } from './root/root.component';
 import { MobileViewComponent } from './mobile-view/mobile-view.component';
 import { TumbnailComponent } from './tumbnail/tumbnail.component';
+import { TumbnailMobileComponent } from './tumbnail-mobile/tumbnail-mobile.component';
 
 @NgModule({
   declarations: [
     DesktopViewComponent,
     RootComponent,
     MobileViewComponent,
-    TumbnailComponent
+    TumbnailComponent,
+    TumbnailMobileComponent
   ],
   imports: [
     CommonModule,
