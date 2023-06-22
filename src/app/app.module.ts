@@ -7,12 +7,14 @@ import { CommonModule } from '@angular/common';
 import { DesktopViewComponent } from './desktop-view/desktop-view.component';
 import { RootComponent } from './root/root.component';
 import { MobileViewComponent } from './mobile-view/mobile-view.component';
+import { TumbnailComponent } from './tumbnail/tumbnail.component';
 
 @NgModule({
   declarations: [
     DesktopViewComponent,
     RootComponent,
-    MobileViewComponent
+    MobileViewComponent,
+    TumbnailComponent
   ],
   imports: [
     CommonModule,

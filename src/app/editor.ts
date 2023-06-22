@@ -36,7 +36,7 @@ export abstract class EditorHelper {
     mediaRecorderOptions = {
         audioBitsPerSecond: 1024 * 1024 * 200,
         videoBitsPerSecond: 1024 * 1024 * 200,
-        mimeType: "video/webm",
+        mimeType: "video/webm; codecs=vp9",
     };
 
     frameData!: any;
@@ -72,6 +72,7 @@ export abstract class EditorHelper {
         if (!ctx) { return; }
         // this.frameData = ctx.canvas.toDataURL();// getImageData(0,0,this.canvasWidth,this.canvasHeight);
         this.frameData = ctx.getImageData(0,0,this.canvasWidth,this.canvasHeight);
+        // console.log(this.frameData)
     }
 
     // gethiddenCanvas() {
@@ -193,7 +194,7 @@ export abstract class EditorHelper {
         );
 
         const randomImageNumber = this.randomIntFromInterval(
-            1,
+            30,
             widthCount * heightCount
         );
         this.randomLocation = randomImageNumber; 
@@ -331,13 +332,14 @@ export abstract class EditorHelper {
         fontSize: number = this.fontSize,
         color: string,
         xpos: number = this.getCanvas().width / 2,
-        ypos: number = fontSize
+        ypos: number = fontSize,
+        font=this.fontName
     ) {
         const ctx = this.getContext();
         if (!ctx) {
             return;
         }
-        ctx.font = (fontSize + 10).toString() + `px ${this.fontName}`;
+        ctx.font = (fontSize + 10).toString() + `px ${font}`;
         ctx.textBaseline = 'middle';
         ctx.textAlign = 'center';
 
@@ -390,5 +392,14 @@ export abstract class EditorHelper {
         const ctx = this.getContext();
         if (!ctx) { return };
         ctx.drawImage(img,x,y)
+    }
+
+     downloadThumbnail(imagePath= this.getCanvas().toDataURL() , imageName: string= 'thumbnail' ){
+        const link = document.createElement('a');
+        link.style.display = 'none';
+        document.body.appendChild(link)
+        link.setAttribute('download', imageName + '.png');
+        link.setAttribute('href', imagePath.replace("image/png", "image/octet-stream"));
+        link.click();
     }
 }

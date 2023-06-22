@@ -12,12 +12,12 @@ export class MobileViewComponent extends EditorHelper implements AfterViewInit {
 
   canvasWidth = 720;
   canvasHeight = 1334;
-  imageBloackSize = 70;
-  textBloackSize = 50;
+  imageBloackSize = 100;
+  textBloackSize = 70;
 
-  videoTime = 9;
+  videoTime = 5;
 
-  fontSize = 20;
+  fontSize = 40;
   textOnTop = 'CAN YOU FIND THE ODD ONE OUT?';
   textOnBottom = 'SUBSCRIBE and LIKE ';
   audiopath1 = 'assets/audio1.mp3';
@@ -29,7 +29,11 @@ export class MobileViewComponent extends EditorHelper implements AfterViewInit {
 
   ngAfterViewInit() {
     this.clearCanvas();
+    this.createVirtualCanvas();
+    this.mediaRecorderOptions.audioBitsPerSecond = 8000000;
+    this.mediaRecorderOptions.videoBitsPerSecond = 8000000;
   }
+
 
 
   rotatedImage!: any;
@@ -46,7 +50,7 @@ export class MobileViewComponent extends EditorHelper implements AfterViewInit {
     const img = new Image();
     img.onload = async () => {
       this.imagesArray[0] = { img: img, imgWidth: img.width, imgHeigh: img.height };
-      this.getOddImage(0);
+      this.oddImagesArray[0] = await this.getOddImage(0) as any;
       await this.renderImage(0);
     };
 
@@ -80,8 +84,8 @@ export class MobileViewComponent extends EditorHelper implements AfterViewInit {
   optons: any = [];
   async renderImage(index: number = 0) {
     const ctx = this.getContext();
-    await this.renderImageURI('assets/like.png', this.getCanvas().width - 80, 300,null);
-    await this.renderImageURI('assets/subscribe.png', 100, this.getCanvas().height - 50,null);
+    await this.renderImageURI('assets/like.png', this.getCanvas().width - 80, 300, null);
+    await this.renderImageURI('assets/subscribe.png', 100, this.getCanvas().height - 50, null);
     this.optons.forEach((option: any) => {
       if (option.rotateImage) {
         ctx?.drawImage(this.oddImagesArray[index].img, option.x, option.y, option.sw, option.sh);
@@ -112,8 +116,10 @@ export class MobileViewComponent extends EditorHelper implements AfterViewInit {
 
 
   chunks: any = [];
-  getMdeiaStreeam(time: number) {
-    const videoStream = this.getCanvas().captureStream();
+  mediaRecorder!: MediaRecorder;
+  getMdeiaStreeam() {
+    const VirtualVideoStream = this.getVirtualCanvasContext().canvas.captureStream();
+    // const videoStream = this.getCanvas().captureStream();
 
 
     const { audioTracks, audioSrcs } = this.addAudioTracks(
@@ -123,15 +129,15 @@ export class MobileViewComponent extends EditorHelper implements AfterViewInit {
     )
 
     const outputStream = new MediaStream();
-    outputStream.addTrack(videoStream.getVideoTracks()[0]);
+    outputStream.addTrack(VirtualVideoStream.getVideoTracks()[0]);
 
     audioTracks.stream.getAudioTracks().forEach(v => {
       outputStream.addTrack(v);
     })
 
 
-    const mediaRecorder = new MediaRecorder(outputStream,this.mediaRecorderOptions);
-
+    const mediaRecorder = new MediaRecorder(outputStream, this.mediaRecorderOptions);
+    this.mediaRecorder = mediaRecorder;
     mediaRecorder.onstop = (e) => {
 
       var blob = new Blob(this.chunks, { type: 'video/webm' });
@@ -167,21 +173,20 @@ export class MobileViewComponent extends EditorHelper implements AfterViewInit {
     }, 1000);
   }
 
-  startRecording(time = this.videoTime * 1000) {
-    const { mediaRecorder, audioSrc } = this.getMdeiaStreeam(time);
+  async startRecording(time = this.videoTime * 1000) {
+    const { mediaRecorder, audioSrc } = this.getMdeiaStreeam();
     audioSrc.forEach(v => v.play());
 
     this.clearCanvas();
-    this.renderImage();
-    setInterval(() => this.renderImage(), 300);
-    mediaRecorder.start();
-
-    
-    
-
+    this.mediaRecorder.start();
+    this.mediaRecorder.pause();
+    await this.renderImage();
+    this.updateFrameData();
+    this.mediaRecorder.resume();
+    // setInterval(() => this.renderImage(), 300);
 
     setTimeout(() => {
-      mediaRecorder.stop();
+      this.mediaRecorder.stop();
       audioSrc.forEach(v => v.pause());
 
     }, time);

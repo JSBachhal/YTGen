@@ -1,25 +1,29 @@
 import { AfterViewInit, Component } from '@angular/core';
 import { EditorHelper } from '../editor';
 import { Animation } from '../animation';
-import { AudioModel, AudioSrcMapModel } from './model/audiomap.model';
+import { AudioModel,AudioSrcMapModel } from '../desktop-view/model/audiomap.model';
 
 @Component({
-  selector: 'app-desktop-view',
-  templateUrl: './desktop-view.component.html',
-  styleUrls: ['./desktop-view.component.scss']
+  selector: 'app-tumbnail',
+  templateUrl: './tumbnail.component.html',
+  styleUrls: ['./tumbnail.component.scss']
 })
-export class DesktopViewComponent extends Animation implements AfterViewInit {
+export class TumbnailComponent extends Animation implements AfterViewInit {
 
   downloadEnable = true //true;
   canvasWidth = 1920 //1920 //3840;
   canvasHeight = 1080 // 1080 // 2160;
-  imageBloackSize = 110;
-  padding = 15;
+  imageBloackSize = 195;
+  padding = 25;
   textBloackSize = 50;
 
   videoTime = 11;
 
-  fontSize = 30;
+  fontSize = 80;
+
+  bgPath='assets/BG5.webp';
+  logoPath='assets/logo.png';
+  fontColor='black'
 
   textOnTop = 'CAN YOU FIND THE ODD ONE OUT ?';
   textOnBottom = 'SUBSCRIBE And LIKE ';
@@ -77,16 +81,21 @@ export class DesktopViewComponent extends Animation implements AfterViewInit {
 
     this.renderIntro()
     // await this.loadBGImage();
-    this.bgImage = await this.loadImage('assets/BG4k4.webp', this.bgImage);
+    this.bgImage = await this.loadImage(this.bgPath, this.bgImage);
+    this.logoImage = await this.loadImage(this.logoPath, this.logoImage);
     this.createVirtualCanvas();
     this.mediaRecorderOptions.audioBitsPerSecond = 8000000;
     this.mediaRecorderOptions.videoBitsPerSecond = 8000000;
+    
+    this.drawImage(this.logoImage,this.canvasWidth-155,this.canvasHeight-150);
+    this.addText('BRAIN THERAPY',20,'yellow',this.canvasWidth-110,this.canvasHeight-30,'Impact')
 
   }
 
   bgImage: any;
+  logoImage: any;
   async loadBGImage() {
-    await this.renderImageURI('assets/BG4k4.webp', 0, 0, this.bgImage);
+    await this.renderImageURI(this.bgPath, 0, 0, this.bgImage);
   }
 
   // Here, I created a function to draw image.
@@ -102,7 +111,7 @@ export class DesktopViewComponent extends Animation implements AfterViewInit {
       const img = new Image();
       img.onload = async () => {
         this.imagesArray[index] = { img: img, imgWidth: img.width, imgHeigh: img.height };
-        this.oddImagesArray[index] = await this.getOddImage(index) as any;
+        // this.oddImagesArray[index] = await this.getOddImage(index) as any;
 
         await this.renderImage(index);
 
@@ -124,6 +133,8 @@ export class DesktopViewComponent extends Animation implements AfterViewInit {
     // render bg
     this.drawImage(this.bgImage);
 
+    this.drawImage(this.logoImage,this.canvasWidth-155,this.canvasHeight-150);
+    this.addText('BRAIN THERAPY',20,'yellow',this.canvasWidth-110,this.canvasHeight-30,'Impact')
     // render like and Sub
     // await this.renderImageURI('assets/like&subscribe.png', this.getCanvas().width / 2 - 200, this.getCanvas().height - 50);
 
@@ -135,10 +146,10 @@ export class DesktopViewComponent extends Animation implements AfterViewInit {
       }
     });
 
-    this.addText(this.textOnTop, this.fontSize, 'yellow');
+    this.addText(this.textOnTop, this.fontSize, this.fontColor);
     this.addText(this.textOnBottom,
       this.fontSize,
-      'yellow',
+      this.fontColor,
       (this.getCanvas().width / 2),
       this.getCanvas().height - this.fontSize
     );
@@ -531,7 +542,7 @@ export class DesktopViewComponent extends Animation implements AfterViewInit {
     this.drawImage(this.bgImage);
 
     text.forEach((text, index) => {
-      this.addText(text, fontSize, 'yellow', this.canvasWidth / 2, (this.canvasHeight / 2) + (index * (fontSize + 15)));
+      this.addText(text, fontSize, this.fontColor, this.canvasWidth / 2, (this.canvasHeight / 2) + (index * (fontSize + 15)));
     })
 
   }
@@ -541,10 +552,11 @@ export class DesktopViewComponent extends Animation implements AfterViewInit {
       20,
       20,
       25,
-      'yellow',
+      this.fontColor,
       'red',
       8
     )
     this.addText(time.toString(), 40, 'black', 45, 45)
   }
 }
+

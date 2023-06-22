@@ -1,18 +1,19 @@
-canvas {
-    background: #222;
-  }
-  
-  .flex {
-    display: flex;
-    /* justify-content: space-around; */
-    margin-right: 1rem;
-    margin-bottom: .5rem;
-  }
-  .flex > :nth-child(even) {
-    margin: 0 1rem;
-  }
+.my-canvas {
+  background: #222;
 
-  label{
-    margin: .5rem 1rem .5rem 0;
-  }
-  
+}
+
+.flex {
+  display: flex;
+  /* justify-content: space-around; */
+  margin-right: 1rem;
+  margin-bottom: .5rem;
+}
+
+.flex> :nth-child(even) {
+  margin: 0 1rem;
+}
+
+label {
+  margin: .5rem 1rem .5rem 0;
+}
