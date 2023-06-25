@@ -173,7 +173,12 @@ export class PuzzleViewComponent extends EditorHelper implements AfterViewInit {
     })
   }
 
-  puzzleText="";
+  puzzleTexts: { text: string, delay: number }[] = [
+    { text: "Two fathers #and #two sons are #in a #car, yet there #are only #three people in #the car.# How?", delay: 3000 },
+    { text: "What do you #buy to eat #but never consume#?", delay: 2000 }
+  ];
+  // puzzleText="";
+  enddelay=4000;
   async startRecording(time = this.videoTime * 1000) {
     const { mediaRecorder, audioSrc } = this.getMdeiaStreeam();
 
@@ -183,23 +188,34 @@ export class PuzzleViewComponent extends EditorHelper implements AfterViewInit {
 
     this.drawImage(this.bgImage);
     // this.startAudioByIndex(0);
-    await this.addRapiText(400, this.puzzleText.split('#'),false,500);
-    await this.addDelay(500);
+    for (let index = 0; index < this.puzzleTexts.length; index++) {
+      const text = this.puzzleTexts[index];
+      const delay = this.puzzleTexts[index].delay;
+      
+      await this.addRapiText(400, text.text.split('#'),false,500);
+      await this.addDelay(delay);
+      this.clearCanvas();
+      this.drawImage(this.bgImage);
+    }
+    
+
+    await this.addDelay(this.enddelay);
     
     this.mediaRecorder.pause();
-    this.startAudioByIndex(1);
+    // this.startAudioByIndex(1);
     // await this.renderImage();
-    this.updateFrameData();
-    await this.startTimer(5);
+    // this.updateFrameData();
+    // await this.startTimer(5);
     this.mediaRecorder.resume();
-    this.stopAudioByIndex(1);
+    // this.mediaRecorder.resume();
+    // this.stopAudioByIndex(1);
     
     // this.mediaRecorder.pause();
     
     this.startAudioByIndex(2);
     this.clearCanvas();
     this.drawImage(this.bgImage);
-    await this.addRapiText(400, ["Write the", "answer in comments"],false,400);
+    await this.addRapiText(400, ["Write the", "answer in comments","Dont Forget To",'Like and Subscribe'],false,400);
     this.updateFrameData();
     this.mediaRecorder.resume();
     await this.addDelay(5000);

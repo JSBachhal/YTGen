@@ -31,10 +31,18 @@
       <div class="flex">
   
         <section>
-            <div>
-                <label>Puzzle Text</label>
-                <textarea rows="10" style="width: 700px;" [(ngModel)]="puzzleText" ></textarea>
-              </div>
+            <button (click)="puzzleTexts.push({text:'',delay:2000})">Add Puzzle</button>
+            <div class="flex">
+                <div *ngFor="let puzzle of puzzleTexts;let i = index" class="flex">
+                    <label>Puzzle Text</label>
+                    <textarea rows="5" style="width: 700px;" [(ngModel)]="puzzleTexts[i].text" ></textarea>
+                    <input  [(ngModel)]="puzzleTexts[i].delay" />
+                </div>
+                <div>
+                    <label>delay</label>
+                    <input  [(ngModel)]="enddelay" />
+                  </div>
+            </div>
           <!-- <canvas hidden id="hiddenCanvas" [width]="50" [height]="50" #hiddenCanvas></canvas> -->
           <canvas id="my-canvas" class="my-canvas" [width]="canvasWidth" [height]="canvasHeight" #myCanvas></canvas>
           <!-- <video   controls #player></video> -->
@@ -61,10 +69,7 @@
                 <label>Image Block Size</label>
                 <input placeholder="imageBloackSize" [(ngModel)]="imageBloackSize" />
               </div>
-              <div>
-                <label>Puzzle Text</label>
-                <textarea rows="5" [(ngModel)]="puzzleText" ></textarea>
-              </div>
+            
             </div>
   
             <div class="">
