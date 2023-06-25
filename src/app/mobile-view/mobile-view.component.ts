@@ -16,7 +16,7 @@ export class MobileViewComponent extends EditorHelper implements AfterViewInit {
   imageBloackSize = 140;
   textBloackSize = 70;
 
-  videoTime = 5;
+  videoTime = 4.5;
 
   fontSize = 40;
   textOnTop = 'CAN YOU FIND THE ODD ONE OUT?';
@@ -25,6 +25,8 @@ export class MobileViewComponent extends EditorHelper implements AfterViewInit {
   audiopath2 = 'assets/audio2.wav';
   audiopath3 = 'assets/audio3.mp3';
   audiopath4 = 'assets/audio4.mp3';
+  
+  audioSrcs!: any[];
 
   constructor() { super() }
 
@@ -71,6 +73,7 @@ export class MobileViewComponent extends EditorHelper implements AfterViewInit {
     img.onload = async () => {
       this.oddImagesArray[0] = { img, imgWidth: img.width, imgHeigh: img.height };
       // this.getOddImage(0);
+      this.clearCanvas();
       await this.renderImage(0);
     };
 
@@ -120,6 +123,7 @@ export class MobileViewComponent extends EditorHelper implements AfterViewInit {
 
   chunks: any = [];
   mediaRecorder!: MediaRecorder;
+  vidSrc:any;
   getMdeiaStreeam() {
     const VirtualVideoStream = this.getVirtualCanvasContext().canvas.captureStream();
     // const videoStream = this.getCanvas().captureStream();
@@ -144,7 +148,10 @@ export class MobileViewComponent extends EditorHelper implements AfterViewInit {
     mediaRecorder.onstop = (e) => {
 
       var blob = new Blob(this.chunks, { type: 'video/webm' });
+      // this.player.nativeElement.srcObject= blob;
+      // this.vidSrc= blob;
       this.chunks = [];
+      // return
 
 
       var url = URL.createObjectURL(blob);

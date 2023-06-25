@@ -9,6 +9,8 @@ import { RootComponent } from './root/root.component';
 import { MobileViewComponent } from './mobile-view/mobile-view.component';
 import { TumbnailComponent } from './tumbnail/tumbnail.component';
 import { TumbnailMobileComponent } from './tumbnail-mobile/tumbnail-mobile.component';
+import { GuessTheNameComponent } from './guess-the-name/guess-the-name.component';
+import { PuzzleViewComponent } from './puzzle-view/puzzle-view.component';
 
 @NgModule({
   declarations: [
@@ -16,7 +18,9 @@ import { TumbnailMobileComponent } from './tumbnail-mobile/tumbnail-mobile.compo
     RootComponent,
     MobileViewComponent,
     TumbnailComponent,
-    TumbnailMobileComponent
+    TumbnailMobileComponent,
+    GuessTheNameComponent,
+    PuzzleViewComponent
   ],
   imports: [
     CommonModule,

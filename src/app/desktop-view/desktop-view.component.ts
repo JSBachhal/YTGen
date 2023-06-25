@@ -160,9 +160,6 @@ export class DesktopViewComponent extends Animation implements AfterViewInit {
         audioSrc
       );
 
-      // audioSource.connect(volume);
-      // volume.connect(destination);
-      // volume.gain.value = v.volume || 100;
       audioSource.connect(destination);
     })
 
@@ -250,12 +247,7 @@ export class DesktopViewComponent extends Animation implements AfterViewInit {
     )
   }
 
-  startAudioByIndex(index: number) {
-    this.audioSrcs[index].play();
-  }
-  stopAudioByIndex(index: number) {
-    this.audioSrcs[index].pause();
-  }
+  
 
   async startRecording(time = (this.videoTime * 1000) * this.imagesArray.length) {
     const { mediaRecorder, audioSrc } = this.getMdeiaStreeam(time);
@@ -536,15 +528,5 @@ export class DesktopViewComponent extends Animation implements AfterViewInit {
 
   }
 
-  drawTimer(time: number) {
-    this.drawCircle(
-      20,
-      20,
-      25,
-      'yellow',
-      'red',
-      8
-    )
-    this.addText(time.toString(), 40, 'black', 45, 45)
-  }
+  
 }

@@ -13,8 +13,8 @@ export class TumbnailComponent extends Animation implements AfterViewInit {
   downloadEnable = true //true;
   canvasWidth = 1920 //1920 //3840;
   canvasHeight = 1080 // 1080 // 2160;
-  imageBloackSize = 195;
-  padding = 25;
+  imageBloackSize = 500;
+  padding = 0;
   textBloackSize = 50;
 
   videoTime = 11;
@@ -261,12 +261,6 @@ export class TumbnailComponent extends Animation implements AfterViewInit {
     )
   }
 
-  startAudioByIndex(index: number) {
-    this.audioSrcs[index].play();
-  }
-  stopAudioByIndex(index: number) {
-    this.audioSrcs[index].pause();
-  }
 
   async startRecording(time = (this.videoTime * 1000) * this.imagesArray.length) {
     const { mediaRecorder, audioSrc } = this.getMdeiaStreeam(time);
@@ -547,16 +541,6 @@ export class TumbnailComponent extends Animation implements AfterViewInit {
 
   }
 
-  drawTimer(time: number) {
-    this.drawCircle(
-      20,
-      20,
-      25,
-      this.fontColor,
-      'red',
-      8
-    )
-    this.addText(time.toString(), 40, 'black', 45, 45)
-  }
+  
 }
 

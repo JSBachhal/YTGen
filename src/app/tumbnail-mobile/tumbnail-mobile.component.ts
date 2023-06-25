@@ -7,6 +7,7 @@ import { EditorHelper } from '../editor';
   styleUrls: ['./tumbnail-mobile.component.scss']
 })
 export class TumbnailMobileComponent  extends EditorHelper implements AfterViewInit {
+  audioSrcs!: any[];
 
   downloadEnable = true;
 

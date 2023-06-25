@@ -20,6 +20,7 @@ export abstract class EditorHelper {
     abstract canvasHeight: number;
     abstract imageBloackSize: number;
     abstract textBloackSize: number;
+    abstract audioSrcs: any[];
 
     abstract videoTime: number;
 
@@ -44,9 +45,9 @@ export abstract class EditorHelper {
         return this.frameData
     }
 
-    virtualCanvas!:HTMLCanvasElement;
-    
-    createVirtualCanvas(){
+    virtualCanvas!: HTMLCanvasElement;
+
+    createVirtualCanvas() {
         this.virtualCanvas = document.createElement('canvas');
         this.virtualCanvas.width = this.canvasWidth;
         this.virtualCanvas.height = this.canvasHeight;
@@ -54,24 +55,24 @@ export abstract class EditorHelper {
         this.updateVirtualCanvas();
     }
 
-    getVirtualCanvasContext(){
-        return this.virtualCanvas.getContext('2d' , { willReadFrequently: true }) || {} as CanvasRenderingContext2D;
+    getVirtualCanvasContext() {
+        return this.virtualCanvas.getContext('2d', { willReadFrequently: true }) || {} as CanvasRenderingContext2D;
     }
 
-    updateVirtualCanvas(){
+    updateVirtualCanvas() {
         // const frameData = this.getUpdatedFrameData();
-        if(this.frameData){
+        if (this.frameData) {
             // this.getVirtualCanvasContext().drawImage(frameData as any,0,0);
-            this.getVirtualCanvasContext().putImageData(this.frameData,0,0);
+            this.getVirtualCanvasContext().putImageData(this.frameData, 0, 0);
         }
-        requestAnimationFrame(()=>this.updateVirtualCanvas());
+        requestAnimationFrame(() => this.updateVirtualCanvas());
     }
 
-    updateFrameData(){
+    updateFrameData() {
         const ctx = this.getContext();
         if (!ctx) { return; }
         // this.frameData = ctx.canvas.toDataURL();// getImageData(0,0,this.canvasWidth,this.canvasHeight);
-        this.frameData = ctx.getImageData(0,0,this.canvasWidth,this.canvasHeight);
+        this.frameData = ctx.getImageData(0, 0, this.canvasWidth, this.canvasHeight);
         // console.log(this.frameData)
     }
 
@@ -89,7 +90,17 @@ export abstract class EditorHelper {
     //     return this.hiddenCanvas.nativeElement.getContext('2d');
     // }
 
-
+    drawTimer(time: number) {
+        this.drawCircle(
+            20,
+            20,
+            25,
+            'yellow',
+            'red',
+            8
+        )
+        this.addText(time.toString(), 40, 'black', 45, 45)
+    }
 
 
     renderTick() {
@@ -197,7 +208,7 @@ export abstract class EditorHelper {
             30,
             widthCount * heightCount
         );
-        this.randomLocation = randomImageNumber; 
+        this.randomLocation = randomImageNumber;
         // console.log('randomImageNumber ' + randomImageNumber);
         // console.log('widthCount' + widthCount);
         // console.log('heightCount' + heightCount);
@@ -228,33 +239,33 @@ export abstract class EditorHelper {
 
     getOddImage(index: number) {
 
-        return new Promise<{ img: any, imgWidth: number, imgHeigh: number }>(res=>{
+        return new Promise<{ img: any, imgWidth: number, imgHeigh: number }>(res => {
 
-        // const degrees = clockwise == true ? 90 : -90;
-        let canvas = document.createElement('canvas');
-        // let canvas = this.gethiddenCanvas();
+            // const degrees = clockwise == true ? 90 : -90;
+            let canvas = document.createElement('canvas');
+            // let canvas = this.gethiddenCanvas();
 
-        canvas.width = this.imageBloackSize;
-        canvas.height = this.imageBloackSize;
+            canvas.width = this.imageBloackSize;
+            canvas.height = this.imageBloackSize;
 
-        let ctx = canvas.getContext('2d');
+            let ctx = canvas.getContext('2d');
 
-        ctx?.rotate(Math.PI);
-        ctx?.drawImage(
-            this.imagesArray[index].img,
-            -this.imageBloackSize,
-            -this.imageBloackSize,
-            this.imageBloackSize,
-            this.imageBloackSize
-        );
-        const sourceImageData = canvas?.toDataURL();
-        const img = new Image();
-        img.onload = () => {
-            // this.oddImagesArray[index] = { img: img, imgWidth: img.width, imgHeigh: img.height };
-            res({ img: img, imgWidth: img.width, imgHeigh: img.height })
-        };
-        img.src = sourceImageData;
-    })
+            ctx?.rotate(Math.PI);
+            ctx?.drawImage(
+                this.imagesArray[index].img,
+                -this.imageBloackSize,
+                -this.imageBloackSize,
+                this.imageBloackSize,
+                this.imageBloackSize
+            );
+            const sourceImageData = canvas?.toDataURL();
+            const img = new Image();
+            img.onload = () => {
+                // this.oddImagesArray[index] = { img: img, imgWidth: img.width, imgHeigh: img.height };
+                res({ img: img, imgWidth: img.width, imgHeigh: img.height })
+            };
+            img.src = sourceImageData;
+        })
 
     }
 
@@ -311,7 +322,7 @@ export abstract class EditorHelper {
             }
         });
     }
-   
+
     async loadImage(path: string, target: any,) {
 
         return new Promise(async res => {
@@ -333,7 +344,7 @@ export abstract class EditorHelper {
         color: string,
         xpos: number = this.getCanvas().width / 2,
         ypos: number = fontSize,
-        font=this.fontName
+        font = this.fontName
     ) {
         const ctx = this.getContext();
         if (!ctx) {
@@ -388,18 +399,34 @@ export abstract class EditorHelper {
         }, 75);
     }
 
-    drawImage(img: any,x: number =0,y: number=0 ){
+    drawImage(img: any, x: number = 0, y: number = 0) {
         const ctx = this.getContext();
         if (!ctx) { return };
-        ctx.drawImage(img,x,y)
+        ctx.drawImage(img, x, y)
     }
 
-     downloadThumbnail(imagePath= this.getCanvas().toDataURL() , imageName: string= 'thumbnail' ){
+    downloadThumbnail(imagePath = this.getCanvas().toDataURL(), imageName: string = 'thumbnail') {
         const link = document.createElement('a');
         link.style.display = 'none';
         document.body.appendChild(link)
         link.setAttribute('download', imageName + '.png');
         link.setAttribute('href', imagePath.replace("image/png", "image/octet-stream"));
         link.click();
+    }
+
+    startAudioByIndex(index: number) {
+        this.audioSrcs[index].play();
+    }
+    stopAudioByIndex(index: number) {
+        this.audioSrcs[index].pause();
+    }
+
+
+    addDelay(delay: number) {
+        return new Promise<boolean>(res => {
+            setTimeout(() => {
+                res(true);
+            }, delay);
+        })
     }
 }
