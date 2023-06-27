@@ -11,7 +11,10 @@ export class RootComponent implements OnInit {
     'desktopView',
     'thumbnail',
     'thumbnailMobile',
-    'guessTheName','puzzle'];
+    'guessTheName',
+    'puzzle',
+    'motivational',
+    'guessTheFlag'];
 
   ngOnInit(): void {
 

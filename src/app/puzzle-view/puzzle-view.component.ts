@@ -1,6 +1,7 @@
 import { AfterViewInit, Component } from '@angular/core';
-import { AudioSrcMapModel, AudioModel } from '../guess-the-name/model/audiomap.model';
+import { AudioSrcMapModel, AudioModel } from './model/audiomap.model';
 import { EditorHelper } from '../editor';
+import { puzzlesData } from './puzzles';
 
 @Component({
   selector: 'app-puzzle-view',
@@ -13,23 +14,29 @@ export class PuzzleViewComponent extends EditorHelper implements AfterViewInit {
   downloadEnable = true;
   EnableAudio = true;
 
-  canvasWidth = 1080;
-  canvasHeight = 1920;
+  canvasWidth = 1920//3840;
+  canvasHeight = 1080//2160;
   imageBloackSize = 140;
   textBloackSize = 70;
 
   videoTime = 4.5;
 
   fontSize = 40;
+  puzzleFontSize = 90;
   textOnTop = 'CAN YOU FIND THE ODD ONE OUT?';
   textOnBottom = 'SUBSCRIBE and LIKE ';
   audiopath1 = 'assets/guessTheName/guessTheNameAudio.mp3';
   endAudio = 'assets/guessTheName/endAudio.mp3';
-  clockAudio = 'assets/audio/clock.wav';
+  bgAudio = 'assets/guessTheName/bgAudio.mp3';
+
+  introImagePath = 'assets/riddles/intro1.png';
+  introImage: any;
+  imgQuestionMarkPath = 'assets/riddles/img2.png';
+  imgQuestionMark: any;
 
   audioSrcMap: AudioSrcMapModel = {
     introAudio: { name: 'introAudio', path: this.audiopath1, index: 0 },
-    clockAudio: { name: 'clockAudio', path: this.clockAudio, index: 1 },
+    bgAudio: { name: 'bgAudio', path: this.bgAudio, index: 1 },
     endAudio: { name: 'endAudio', path: this.endAudio, index: 2 },
 
   };
@@ -41,9 +48,11 @@ export class PuzzleViewComponent extends EditorHelper implements AfterViewInit {
     this.mediaRecorderOptions.audioBitsPerSecond = 8000000;
     this.mediaRecorderOptions.videoBitsPerSecond = 8000000;
 
+    this.bgImage = await this.loadImage('assets/guessTheName/BG34k.png', this.bgImage);
+    this.introImage = await this.loadImage(this.introImagePath, this.introImage);
+    this.imgQuestionMark = await this.loadImage(this.imgQuestionMarkPath, this.imgQuestionMark);
     this.clearCanvas();
     this.createVirtualCanvas();
-    this.bgImage = await this.loadImage('assets/guessTheName/BG1.png', this.bgImage);
 
 
 
@@ -82,7 +91,7 @@ export class PuzzleViewComponent extends EditorHelper implements AfterViewInit {
 
 
 
-  
+
 
   addAudioTracks(audioPaths: AudioModel[]) {
     const audioCtx = new AudioContext();
@@ -127,7 +136,7 @@ export class PuzzleViewComponent extends EditorHelper implements AfterViewInit {
     this.mediaRecorder = mediaRecorder;
     mediaRecorder.onstop = (e) => {
 
-      var blob = new Blob(this.chunks, { type: 'video/webm' });
+      var blob = new Blob(this.chunks, { type: 'video/mp4' });
       // this.player.nativeElement.srcObject= blob;
       // this.vidSrc= blob;
       this.chunks = [];
@@ -141,7 +150,7 @@ export class PuzzleViewComponent extends EditorHelper implements AfterViewInit {
       document.body.appendChild(a);
       (a.style as any) = 'display: none';
       a.href = url;
-      a.download = 'Can you Find It ? HIGHT IQ 99% Fail #shorts .mp4';
+      a.download = 'Solve The Puzzle.mp4';
       a.click();
       window.URL.revokeObjectURL(url);
     };
@@ -167,65 +176,154 @@ export class PuzzleViewComponent extends EditorHelper implements AfterViewInit {
           return;
         }
         this.drawTimer(time);
+        this.drawTopTimer(time,timer);
         this.updateFrameData();
         time = time - 1;
       }, 1000);
     })
   }
 
-  puzzleTexts: { text: string, delay: number }[] = [
-    { text: "Two fathers #and #two sons are #in a #car, yet there #are only #three people in #the car.# How?", delay: 3000 },
-    { text: "What do you #buy to eat #but never consume#?", delay: 2000 }
-  ];
-  // puzzleText="";
-  enddelay=4000;
+  async renderIntro() {
+    return new Promise<boolean>(async res => {
+      this.mediaRecorder.pause();
+      this.clearCanvas();
+      this.drawImage(this.bgImage);
+      this.drawImage(this.introImage, (this.canvasWidth / 2) + (this.introImage.width / 2), this.canvasHeight / 2 - this.introImage.height);
+      
+      this.drawImage(this.imgQuestionMark,
+        (this.canvasWidth -300 ),
+        this.canvasHeight/2  + 200 , {imgWidth:300,imgHeight:300});
+      this.mediaRecorder.resume();
+      await this.addRapidText(450, [
+        `${this.puzzleTexts.length} VERY HARD`,
+        'RIDDLES',
+        '(PART 1)'
+      ], false,
+        (this.canvasWidth / 2) / 2, (this.canvasHeight / 2) + 150, { fontSize: 140, color: '#ba2649' });
+
+      await this.addDelay(2500);
+      res(true);
+    })
+  }
+  
+
+
+
+  puzzleTexts: { text: string, delay: number | string, answer: string }[] = puzzlesData;
+
+  enddelay = 4000;
   async startRecording(time = this.videoTime * 1000) {
     const { mediaRecorder, audioSrc } = this.getMdeiaStreeam();
 
     this.clearCanvas();
+    this.drawImage(this.bgImage);
     this.mediaRecorder.start();
     this.mediaRecorder.pause();
-
-    this.drawImage(this.bgImage);
-    // this.startAudioByIndex(0);
-    for (let index = 0; index < this.puzzleTexts.length; index++) {
-      const text = this.puzzleTexts[index];
-      const delay = this.puzzleTexts[index].delay;
-      
-      await this.addRapiText(400, text.text.split('#'),false,500);
-      await this.addDelay(delay);
-      this.clearCanvas();
-      this.drawImage(this.bgImage);
-    }
     
-
-    await this.addDelay(this.enddelay);
+    await this.renderIntro();
+    
     
     this.mediaRecorder.pause();
-    // this.startAudioByIndex(1);
-    // await this.renderImage();
-    // this.updateFrameData();
-    // await this.startTimer(5);
-    this.mediaRecorder.resume();
-    // this.mediaRecorder.resume();
-    // this.stopAudioByIndex(1);
-    
-    // this.mediaRecorder.pause();
-    
-    this.startAudioByIndex(2);
+
+    for (let index = 0; index < this.puzzleTexts.length; index++) {
+      this.clearCanvas();
+      this.drawImage(this.bgImage);
+      await this.renderPuzzleText(index)
+    }
+
+    this.mediaRecorder.pause();
     this.clearCanvas();
     this.drawImage(this.bgImage);
-    await this.addRapiText(400, ["Write the", "answer in comments","Dont Forget To",'Like and Subscribe'],false,400);
-    this.updateFrameData();
+    await this.renderText("Write In the Comments How many did you get? Dont Forget To Like and Subscribe");
     this.mediaRecorder.resume();
-    await this.addDelay(5000);
-
+    this.startAudioByIndex(2);
+    this.startAudioByIndex(this.audioSrcMap.bgAudio.index);
+    await this.addDelay(3000);
 
     this.mediaRecorder.stop();
     if (this.EnableAudio) {
       audioSrc.forEach(v => v.pause());
     }
 
+  }
+
+  async renderPuzzleText(index: number) {
+
+    return new Promise(async res => {
+      this.clearCanvas();
+      this.drawImage(this.bgImage);
+      await this.addRapidText(200, [`Number ${index + 1}`],false);
+      this.updateFrameData();
+      this.mediaRecorder.resume();
+      await this.addDelay(1500);
+
+      this.mediaRecorder.pause();
+      this.clearCanvas();
+      this.drawImage(this.bgImage);
+      this.drawImage(this.imgQuestionMark,
+        (this.canvasWidth -300 ),
+        this.canvasHeight/2  + 200 , {imgWidth:300,imgHeight:300});
+
+      const text = this.puzzleTexts[index];
+      const delay = this.puzzleTexts[index].delay;
+      let textProcessed = text.text.split(' ');
+      let i = 0;
+      let textData: string[] = [];
+
+      const chunksize = 6;
+      for (let index = 0; index < textProcessed.length; index++) {
+        if (textData[i] === undefined) {
+          textData[i] = '';
+        }
+        const element = textProcessed[index];
+        textData[i] += `${element} `;
+        if (index && index % chunksize === 0) {
+          i += 1;
+        }
+      }
+
+      await this.addRapidText(450, textData, false, this.canvasWidth / 2, this.canvasHeight / 2, { fontSize: this.puzzleFontSize, color: '#FFF' });
+      this.updateFrameData();
+      this.startAudioByIndex(this.audioSrcMap.bgAudio.index);
+      this.mediaRecorder.resume();
+      await this.startTimer(parseInt(delay.toString()));
+
+      await this.renderText(text.answer, 5, 'Answer : ');
+      await this.addDelay(2000);
+      this.stopAudioByIndex(this.audioSrcMap.bgAudio.index);
+      res(true);
+    })
+  }
+
+  async renderText(result: string, chunkSize = 6, prependText?: string) {
+    return new Promise<boolean>(async res => {
+      this.mediaRecorder.pause();
+      this.clearCanvas();
+      this.drawImage(this.bgImage);
+
+      const text = result;
+      let textProcessed = text.split(' ');
+      let i = 0;
+      let textData: string[] = [];
+
+      // const chunksize = 6;
+      for (let index = 0; index < textProcessed.length; index++) {
+        if (textData[i] === undefined) {
+          textData[i] = i === 0 ? `${prependText ? prependText : ''}` : '';
+        }
+        const element = textProcessed[index];
+        textData[i] += `${element} `;
+        if (index && index % chunkSize === 0) {
+          i += 1;
+        }
+      }
+
+      await this.addRapidText(450, textData, false, this.canvasWidth / 2, this.canvasHeight / 2, { fontSize: this.puzzleFontSize, color: 'yellow' });
+      this.updateFrameData();
+      this.mediaRecorder.resume();
+      this.addDelay(3000);
+      res(true);
+    })
   }
 
   optons: any = [];
@@ -255,38 +353,4 @@ export class PuzzleViewComponent extends EditorHelper implements AfterViewInit {
 
 
 
-
-  rapidTextInterval!: any;
-  addRapiText(intervalTime = 500, text: string[],clearPreviousText=true,startYPos=this.canvasHeight/2) {
-    return new Promise<boolean>(res => {
-
-      let fontSize=130;
-      let index = 0;
-      if (this.rapidTextInterval) {
-        clearInterval(this.rapidTextInterval);
-      }
-    
-      this.rapidTextInterval = setInterval(() => {
-
-        if (index === text.length) {
-          clearInterval(this.rapidTextInterval);
-          res(true);
-          return;
-        }
-
-        if (text[index]) {
-          if(clearPreviousText){
-            this.clearCanvas();
-            this.drawImage(this.bgImage);
-            this.addText(text[index], fontSize, '#F34573', this.canvasWidth / 2, this.canvasHeight / 2);
-          }else {
-            this.addText(text[index], fontSize, '#F34573', this.canvasWidth / 2, startYPos + (index * fontSize));
-          }
-        }
-        this.updateFrameData();
-        index += 1;
-      }, intervalTime)
-      this.mediaRecorder.resume();
-    })
-  }
 }

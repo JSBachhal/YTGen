@@ -6,6 +6,8 @@ import { TumbnailComponent } from './tumbnail/tumbnail.component';
 import { TumbnailMobileComponent } from './tumbnail-mobile/tumbnail-mobile.component';
 import { GuessTheNameComponent } from './guess-the-name/guess-the-name.component';
 import { PuzzleViewComponent } from './puzzle-view/puzzle-view.component';
+import { MotivationalComponent } from './motivational/motivational.component';
+import { GuessTheFlagComponent } from './guess-the-flag/guess-the-flag.component';
 
 const routes: Routes = [
   { path: '', redirectTo: 'mobileView', pathMatch: 'full' },
@@ -15,6 +17,8 @@ const routes: Routes = [
   { path: 'thumbnailMobile', component: TumbnailMobileComponent },
   { path: 'guessTheName', component: GuessTheNameComponent },
   { path: 'puzzle', component: PuzzleViewComponent },
+  { path: 'motivational', component: MotivationalComponent },
+  { path: 'guessTheFlag', component: GuessTheFlagComponent },
   { path: '**', redirectTo: 'mobileView' },
 ];
 

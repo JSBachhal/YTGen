@@ -19,10 +19,10 @@ export class DesktopViewComponent extends Animation implements AfterViewInit {
 
   videoTime = 11;
 
-  fontSize = 30;
+  fontSize = 80;
 
   textOnTop = 'CAN YOU FIND THE ODD ONE OUT ?';
-  textOnBottom = 'SUBSCRIBE And LIKE ';
+  textOnBottom = 'SUBSCRIBE And LIKE 👍';
 
   audiopath1 = 'assets/audio1.mp3';
   audiopath2 = 'assets/audio2.wav';
@@ -70,12 +70,13 @@ export class DesktopViewComponent extends Animation implements AfterViewInit {
 
   constructor() { super() }
 
+  introPath='assets/introvideo/introBrainTherapy.mp4';
+
   async ngAfterViewInit() {
     this.clearCanvas();
-    // this.createElements();
-    // this.player.nativeElement.srcObject = this.getCanvas().captureStream();
-
-    this.renderIntro()
+    
+    const player = await this.renderIntro(this.introPath,()=>null);
+    player.play();
     // await this.loadBGImage();
     this.bgImage = await this.loadImage('assets/BG4k4.webp', this.bgImage);
     this.createVirtualCanvas();
@@ -103,10 +104,7 @@ export class DesktopViewComponent extends Animation implements AfterViewInit {
       img.onload = async () => {
         this.imagesArray[index] = { img: img, imgWidth: img.width, imgHeigh: img.height };
         this.oddImagesArray[index] = await this.getOddImage(index) as any;
-
         await this.renderImage(index);
-
-
       };
 
       reader.onloadend = () => {
@@ -116,36 +114,6 @@ export class DesktopViewComponent extends Animation implements AfterViewInit {
 
     }
   }
-
-  optons: any = [];
-  renderImage(index: number) {
-
-    const ctx = this.getContext();
-    // render bg
-    this.drawImage(this.bgImage);
-
-    // render like and Sub
-    // await this.renderImageURI('assets/like&subscribe.png', this.getCanvas().width / 2 - 200, this.getCanvas().height - 50);
-
-    this.optons.forEach((option: any) => {
-      if (option.rotateImage) {
-        ctx?.drawImage(this.oddImagesArray[index].img, option.x, option.y, option.sw, option.sh);
-      } else {
-        ctx?.drawImage(this.imagesArray[index].img, option.x, option.y, option.sw, option.sh);
-      }
-    });
-
-    this.addText(this.textOnTop, this.fontSize, 'yellow');
-    this.addText(this.textOnBottom,
-      this.fontSize,
-      'yellow',
-      (this.getCanvas().width / 2),
-      this.getCanvas().height - this.fontSize
-    );
-
-
-  }
-
 
   addAudioTracks(audioPaths: AudioModel[]) {
     const audioCtx = new AudioContext();
@@ -224,17 +192,6 @@ export class DesktopViewComponent extends Animation implements AfterViewInit {
     return { mediaRecorder: mediaRecorder, audioSrc: audioSrcs };
   }
 
-  startTimer() {
-    let time = 10;
-    setInterval(() => {
-      this.getClock(time);
-      if (time <= 0) {
-
-      } else {
-        time -= 1;
-      }
-    }, 1000);
-  }
 
   highLightOddImage() {
     this.drawCircle(
@@ -251,19 +208,39 @@ export class DesktopViewComponent extends Animation implements AfterViewInit {
 
   async startRecording(time = (this.videoTime * 1000) * this.imagesArray.length) {
     const { mediaRecorder, audioSrc } = this.getMdeiaStreeam(time);
-    // audioSrc.forEach(v => v.play());
-
-
 
     this.clearCanvas();
     mediaRecorder.start();
+    mediaRecorder.pause();
+    this.drawImage(this.bgImage);
+    const player = await this.createIntro(mediaRecorder);
+    player.play();
+    mediaRecorder.resume();
+    // intro audio
+    this.startAudioByIndex(0);
 
-    await this.createIntro(mediaRecorder);
+    await this.renderPostIntroText(9000);
 
 
     this.startAudioByIndex(11);
-    this.recordAllFrames(0, this.imagesArray.length);
+    const allFrames = new Promise<boolean>(async res=>{
+      await this.recordAllFrames(0, this.imagesArray.length,()=>res(true));
+    });
 
+    await allFrames;
+    this.renderEnding();
+
+  }
+
+  renderPostIntroText(time:number) {
+    return new Promise<boolean>(res => {
+      setTimeout(async () => {
+        this.stop();
+        await this.awaitTextRender(["1 Correct Answer = 1 POINT"], 120, 4000);
+        await this.awaitTextRender(["LEVEL 1"], 120, 2000);
+        res(true);
+      }, time);
+    })
   }
 
   startChallangeAudioIndex = 1;
@@ -271,7 +248,7 @@ export class DesktopViewComponent extends Animation implements AfterViewInit {
 
   timerInterval: any;
 
-  recordAllFrames(currentIndex: number, totalIndex: number) {
+  async recordAllFrames(currentIndex: number, totalIndex: number,doneCallback:()=>void) {
     this.optons = this.generateOptions();
     this.startChallangeAudioIndex = this.randomIntFromInterval(1, 5);
     this.endChallangeAudioIndex = this.randomIntFromInterval(6, 10);
@@ -280,7 +257,7 @@ export class DesktopViewComponent extends Animation implements AfterViewInit {
     this.clearCanvas();
 
     if (currentIndex < totalIndex) {
-      this.renderImage(currentIndex);
+      await this.renderImage(currentIndex);
       this.updateFrameData();
       this.mediaRecorder.resume();
       this.startAudioByIndex(this.startChallangeAudioIndex);
@@ -301,26 +278,42 @@ export class DesktopViewComponent extends Animation implements AfterViewInit {
       this.startAudioByIndex(this.audioSrcMap.clockAudio.index);
 
       const showResultAfter = (this.videoTime * 1000);
-      setTimeout(() => {
+      setTimeout(async () => {
         const showNextItemAfter = 4500;
-        this.renderResult(currentIndex, totalIndex, showNextItemAfter);
+        await this.renderResult(currentIndex, totalIndex, showNextItemAfter,doneCallback);
         this.updateFrameData();
         //stop clock
         this.stopAudioByIndex(this.audioSrcMap.clockAudio.index);
         this.startAudioByIndex(this.endChallangeAudioIndex)
       }, showResultAfter);
 
-    } else {
-      this.renderEnding();
+    } else doneCallback();
 
-    }
+  }
+  
+  optons: any = [];
+  async renderImage(index: number) {
+
+    const ctx = this.getContext();
+    // render bg
+    this.drawImage(this.bgImage);
+    await this.addRapidText(0,[this.textOnTop],false, this.getCanvas().width /2 , 50,{color:'yellow'})
+    await this.addRapidText(0,[this.textOnBottom],false, this.getCanvas().width / 2, this.getCanvas().height - this.fontSize+15)
+    
+    this.optons.forEach((option: any) => {
+      if (option.rotateImage) {
+        ctx?.drawImage(this.oddImagesArray[index].img, option.x, option.y, option.sw, option.sh);
+      } else {
+        ctx?.drawImage(this.imagesArray[index].img, option.x, option.y, option.sw, option.sh);
+      }
+    });
 
   }
 
-  renderResult(currentIndex: number, totalIndex: number, resultTime: number) {
+  renderResult(currentIndex: number, totalIndex: number, resultTime: number,doneCallback:()=>void) {
     this.highLightOddImage();
     setTimeout(() => {
-      this.recordAllFrames(currentIndex + 1, totalIndex);
+      this.recordAllFrames(currentIndex + 1, totalIndex,doneCallback);
     }, resultTime);
   }
 
@@ -386,42 +379,12 @@ export class DesktopViewComponent extends Animation implements AfterViewInit {
   }
 
   async createIntro(mediaRecorder: MediaRecorder) {
-    return new Promise(async resolve => {
-      mediaRecorder.pause();
+    return new Promise<HTMLVideoElement>(async resolve => {
+      
       const ctx = this.getContext();
       // render bg
       if (!ctx) { return }
-      this.renderIntro();
-
-      this.play();
-
-      mediaRecorder.resume();
-      // intro audio
-      this.startAudioByIndex(0);
-
-
-      setTimeout(async () => {
-        this.stop();
-
-        await this.awaitTextRender(["1 Correct Answer = 1 POINT"], 120, 4000);
-        await this.awaitTextRender(["LEVEL 1"], 120, 2000);
-        resolve(true);
-        // this.insertIntroText(['1 Correct Answer = 1 POINT']);
-        // this.updateFrameData();
-
-
-
-        // setTimeout(() => {
-
-        //   this.insertIntroText(['LEVEL 1']);
-        //   this.updateFrameData();
-
-
-        //   setTimeout(() => resolve(true), 2000)
-
-        // }, 4000);
-
-      }, 9000);
+      this.renderIntro(this.introPath,(playerElement)=>resolve(playerElement));
 
     })
   }
@@ -432,7 +395,7 @@ export class DesktopViewComponent extends Animation implements AfterViewInit {
   videoWidth!: number;
   videoHeight!: number;
 
-  createVideoElement() {
+  createVideoElement(videoSrc: string, readyCallback: (introVideo:HTMLVideoElement) => void) {
     const introVideoCanvas = document.createElement('canvas');
     const ctx = introVideoCanvas.getContext('2d', { willReadFrequently: true });
     if (!ctx) { return };
@@ -442,29 +405,30 @@ export class DesktopViewComponent extends Animation implements AfterViewInit {
     ctx.canvas.height = this.canvasHeight;
 
     const introVideo = document.createElement('video');
-    introVideo.src = 'assets/introvideo/introBrainTherapy.mp4';
+    introVideo.src = videoSrc;
 
-    introVideo.addEventListener("loadedmetadata", (e) => {
+    introVideo.onloadedmetadata = (e) => {
       this.videoWidth = 1920 // this.canvasWidth;
       this.videoHeight = 1080 // this.canvasHeight;
+      readyCallback(introVideo);
+    };
 
-    }, false);
+    introVideo.onplay = (e) => {
+      this.timerCallback()
+    };
 
     this.introVideo = introVideo;
     this.introVideoCanvas = introVideoCanvas;
-
+    return this.introVideo;
   }
 
-  async renderIntro() {
-    this.createVideoElement();
-    this.introVideo?.addEventListener("play", () => {
-      this.timerCallback()
-    })
+  async renderIntro(videoSrc:string,readyCallback:(introVideo:HTMLVideoElement)=>void) {
+    return this.createVideoElement(videoSrc,readyCallback) as HTMLVideoElement;
   }
 
   play() {
     this.drawImage(this.bgImage);
-    this.introVideo?.play();
+    return this.introVideo?.play();
   }
 
   stop() {

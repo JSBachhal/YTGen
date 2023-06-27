@@ -15,6 +15,10 @@
         <input type="file" class="file-input" (change)="onOddFileSelected($event)" #fileUpload />
       </div>
       <div>
+        <label>Odd Images</label>
+        <button (click)="redraw()" >redraw</button>
+      </div>
+      <div>
         <a [routerLink]="['/desktopView']" style="margin-right: 1rem;">Desktop View</a>
         <a [routerLink]="['/thumbnailMobile']">thumbnail View</a>
         <div>
@@ -37,7 +41,7 @@
       <section>
         <!-- <canvas hidden id="hiddenCanvas" [width]="50" [height]="50" #hiddenCanvas></canvas> -->
         <canvas id="my-canvas" class="my-canvas" [width]="canvasWidth" [height]="canvasHeight" #myCanvas></canvas>
-        <video   controls #player></video>
+        <!-- <video   controls #player></video> -->
       </section>
 
       <section>
@@ -60,6 +64,7 @@
             <div>
               <label>Image Block Size</label>
               <input placeholder="imageBloackSize" [(ngModel)]="imageBloackSize" />
+              <!-- <button style="margin-left: 1rem;" (click)="updateUI()"> updateUI</button> -->
             </div>
           </div>
 

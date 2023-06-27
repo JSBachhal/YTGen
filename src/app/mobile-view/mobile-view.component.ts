@@ -13,13 +13,14 @@ export class MobileViewComponent extends EditorHelper implements AfterViewInit {
 
   canvasWidth = 1080;
   canvasHeight = 1920;
-  imageBloackSize = 140;
+  imageBloackSize = 145;
   textBloackSize = 70;
+  bgColor='#222';
 
   videoTime = 4.5;
 
-  fontSize = 40;
-  textOnTop = 'CAN YOU FIND THE ODD ONE OUT?';
+  fontSize = 70;
+  textOnTop = 'FIND THE ODD ONE OUT?';
   textOnBottom = 'SUBSCRIBE and LIKE ';
   audiopath1 = 'assets/audio1.mp3';
   audiopath2 = 'assets/audio2.wav';
@@ -29,24 +30,31 @@ export class MobileViewComponent extends EditorHelper implements AfterViewInit {
   audioSrcs!: any[];
 
   constructor() { super() }
-
-  ngAfterViewInit() {
-    this.clearCanvas();
+  // bgImage:any;
+  async ngAfterViewInit() {
+    this.imageBloackSize = parseInt(prompt('Please provide imageBloackSize', this.imageBloackSize.toString()) 
+    || this.imageBloackSize.toString()) ;
+    this.clearCanvas(this.bgColor);
     this.createVirtualCanvas();
+    // this.bgImage = await this.loadImage('assets/BGBlue.webp', this.bgImage);
+    // this.bgImage = await this.loadImage('assets/BGPink.jpg', this.bgImage);
     this.mediaRecorderOptions.audioBitsPerSecond = 8000000;
     this.mediaRecorderOptions.videoBitsPerSecond = 8000000;
+    // this.drawImage(this.bgImage);
   }
 
-
+  updateUI(){
+    this.ngAfterViewInit();
+  }
 
   rotatedImage!: any;
 
 
   // Here, I created a function to draw image.
   async onFileSelected(e: any) {
-    this.clearCanvas();
+    this.clearCanvas(this.bgColor);
 
-    this.optons = this.generateOptions();
+    this.optons = this.generateOptions({padding:10});
     const reader = new FileReader();
     const file = e.target.files[0];
     // load to image to get it's width/height
@@ -73,7 +81,7 @@ export class MobileViewComponent extends EditorHelper implements AfterViewInit {
     img.onload = async () => {
       this.oddImagesArray[0] = { img, imgWidth: img.width, imgHeigh: img.height };
       // this.getOddImage(0);
-      this.clearCanvas();
+      this.clearCanvas(this.bgColor);
       await this.renderImage(0);
     };
 
@@ -85,23 +93,6 @@ export class MobileViewComponent extends EditorHelper implements AfterViewInit {
     reader.readAsDataURL(file);
   }
 
-  optons: any = [];
-  async renderImage(index: number = 0) {
-    const ctx = this.getContext();
-    await this.renderImageURI('assets/like.png', this.getCanvas().width - 80, 300, null);
-    // await this.renderImageURI('assets/subscribe.png', 100, this.getCanvas().height - 50, null);
-    this.addText('Please Like And Subscribe',40,'yellow',this.canvasWidth/2,this.canvasHeight-50)
-
-    this.optons.forEach((option: any) => {
-      if (option.rotateImage) {
-        ctx?.drawImage(this.oddImagesArray[index].img, option.x, option.y, option.sw, option.sh);
-      } else {
-        ctx?.drawImage(this.imagesArray[index].img, option.x, option.y, option.sw, option.sh);
-      }
-    });
-    this.addText(this.textOnTop, this.fontSize, 'yellow');
-
-  }
 
   addAudioTracks(...audioPaths: string[]) {
     const audioCtx = new AudioContext();
@@ -159,7 +150,7 @@ export class MobileViewComponent extends EditorHelper implements AfterViewInit {
       document.body.appendChild(a);
       (a.style as any) = 'display: none';
       a.href = url;
-      a.download = 'Can you Find It ? HIGHT IQ 99% Fail #shorts .mp4';
+      a.download = 'Find the odd one out @braindevelopmentSkills .mp4';
       a.click();
       window.URL.revokeObjectURL(url);
     };
@@ -170,17 +161,11 @@ export class MobileViewComponent extends EditorHelper implements AfterViewInit {
     return { mediaRecorder: mediaRecorder, audioSrc: audioSrcs };
   }
 
-  startTimer() {
-    let time = 10;
-    setInterval(() => {
-      this.getClock(time);
-      if (time <= 0) {
-        // this.drawCircle(this.getContext(), this.rotatedOptionLocation.x + (this.imageBloackSize / 2),
-        // this.rotatedOptionLocation.y + (this.imageBloackSize / 2), this.imageBloackSize/1.2, 'transparent', 'black', 5);
-      } else {
-        time -= 1;
-      }
-    }, 1000);
+  async redraw(){
+    this.optons= this.generateOptions({padding:10})
+    this.clearCanvas(this.bgColor);
+
+    await this.renderImage();
   }
 
   async startRecording(time = this.videoTime * 1000) {
@@ -189,7 +174,7 @@ export class MobileViewComponent extends EditorHelper implements AfterViewInit {
       audioSrc.forEach(v => v.play());
     }
 
-    this.clearCanvas();
+    this.clearCanvas(this.bgColor);
     this.mediaRecorder.start();
     this.mediaRecorder.pause();
     await this.renderImage();
@@ -205,18 +190,48 @@ export class MobileViewComponent extends EditorHelper implements AfterViewInit {
     }, time);
   }
 
+  
+  optons: any = [];
+  async renderImage(index: number = 0) {
+    // this.drawImage(this.bgImage);
+    const ctx = this.getContext();
+    await this.addRapidText(0,['L','I','K','E','👇'],false, this.getCanvas().width - 120, 450)
+   
+
+    this.optons.forEach((option: any) => {
+      if (option.rotateImage) {
+        ctx?.drawImage(this.oddImagesArray[index].img, option.x, option.y, option.sw, option.sh);
+      } else {
+        ctx?.drawImage(this.imagesArray[index].img, option.x, option.y, option.sw, option.sh);
+      }
+    });
+    this.addText(this.textOnTop, this.fontSize, 'yellow');
+
+  }
 
 
-  generateOptions(
-    gridWidth = this.canvasWidth,
-    gridHeight = this.canvasHeight,
-    imageBloackSize = this.imageBloackSize
+
+  generateOptions(options?:{
+   gridWidth? :number,
+    gridHeight? :number,
+    imageBloackSize? :number,
+    padding?:number
+  }
   ) {
 
+    const config ={
+      gridWidth : this.canvasWidth,
+      gridHeight : this.canvasHeight,
+      imageBloackSize : this.imageBloackSize,
+      padding : 15
+      ,...options
+    }
+    console.log(config)
+
     const superOptions = super.generateOptionsHelper(
-      gridWidth,
-      gridHeight,
-      imageBloackSize, 15);
+      config.gridWidth,
+      config.gridHeight,
+      config.imageBloackSize, config.padding);
 
     return superOptions;
 

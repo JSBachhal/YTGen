@@ -11,6 +11,8 @@ import { TumbnailComponent } from './tumbnail/tumbnail.component';
 import { TumbnailMobileComponent } from './tumbnail-mobile/tumbnail-mobile.component';
 import { GuessTheNameComponent } from './guess-the-name/guess-the-name.component';
 import { PuzzleViewComponent } from './puzzle-view/puzzle-view.component';
+import { MotivationalComponent } from './motivational/motivational.component';
+import { GuessTheFlagComponent } from './guess-the-flag/guess-the-flag.component';
 
 @NgModule({
   declarations: [
@@ -20,7 +22,9 @@ import { PuzzleViewComponent } from './puzzle-view/puzzle-view.component';
     TumbnailComponent,
     TumbnailMobileComponent,
     GuessTheNameComponent,
-    PuzzleViewComponent
+    PuzzleViewComponent,
+    MotivationalComponent,
+    GuessTheFlagComponent
   ],
   imports: [
     CommonModule,

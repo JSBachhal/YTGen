@@ -13,7 +13,7 @@ export class TumbnailComponent extends Animation implements AfterViewInit {
   downloadEnable = true //true;
   canvasWidth = 1920 //1920 //3840;
   canvasHeight = 1080 // 1080 // 2160;
-  imageBloackSize = 500;
+  imageBloackSize = 300;
   padding = 0;
   textBloackSize = 50;
 
@@ -25,8 +25,8 @@ export class TumbnailComponent extends Animation implements AfterViewInit {
   logoPath='assets/logo.png';
   fontColor='black'
 
-  textOnTop = 'CAN YOU FIND THE ODD ONE OUT ?';
-  textOnBottom = 'SUBSCRIBE And LIKE ';
+  textOnTop = '99% Fail 🧠😱';
+  textOnBottom = '';
 
   audiopath1 = 'assets/audio1.mp3';
   audiopath2 = 'assets/audio2.wav';
@@ -75,6 +75,8 @@ export class TumbnailComponent extends Animation implements AfterViewInit {
   constructor() { super() }
 
   async ngAfterViewInit() {
+    this.imageBloackSize = parseInt(prompt('Please provide imageBloackSize', this.imageBloackSize.toString()) 
+    || this.imageBloackSize.toString()) ;
     this.clearCanvas();
     // this.createElements();
     // this.player.nativeElement.srcObject = this.getCanvas().captureStream();
@@ -127,14 +129,22 @@ export class TumbnailComponent extends Animation implements AfterViewInit {
   }
 
   optons: any = [];
-  renderImage(index: number) {
+  async renderImage(index: number) {
 
     const ctx = this.getContext();
     // render bg
     this.drawImage(this.bgImage);
 
     this.drawImage(this.logoImage,this.canvasWidth-155,this.canvasHeight-150);
-    this.addText('BRAIN THERAPY',20,'yellow',this.canvasWidth-110,this.canvasHeight-30,'Impact')
+    this.addText('BRAIN THERAPY',20,'yellow',this.canvasWidth-110,this.canvasHeight-30,'Impact');
+
+    if(this.textOnTop){
+    await this.addRapidText(0,[this.textOnTop],false, this.getCanvas().width /2 , 100,{fontSize:140})
+    }
+    if(this.textOnBottom){
+
+      await this.addRapidText(0,[this.textOnBottom],false, (this.getCanvas().width / 2), this.getCanvas().height - this.fontSize + 15)
+    }
     // render like and Sub
     // await this.renderImageURI('assets/like&subscribe.png', this.getCanvas().width / 2 - 200, this.getCanvas().height - 50);
 
@@ -145,14 +155,14 @@ export class TumbnailComponent extends Animation implements AfterViewInit {
         ctx?.drawImage(this.imagesArray[index].img, option.x, option.y, option.sw, option.sh);
       }
     });
-
-    this.addText(this.textOnTop, this.fontSize, this.fontColor);
-    this.addText(this.textOnBottom,
-      this.fontSize,
-      this.fontColor,
-      (this.getCanvas().width / 2),
-      this.getCanvas().height - this.fontSize
-    );
+    
+    // this.addText(this.textOnTop, this.fontSize, this.fontColor);
+    // this.addText(this.textOnBottom,
+    //   this.fontSize,
+    //   this.fontColor,
+    //   (this.getCanvas().width / 2),
+    //   this.getCanvas().height - this.fontSize
+    // );
 
 
   }
@@ -275,7 +285,7 @@ export class TumbnailComponent extends Animation implements AfterViewInit {
 
 
     this.startAudioByIndex(11);
-    this.recordAllFrames(0, this.imagesArray.length);
+    await this.recordAllFrames(0, this.imagesArray.length);
 
   }
 
@@ -284,7 +294,7 @@ export class TumbnailComponent extends Animation implements AfterViewInit {
 
   timerInterval: any;
 
-  recordAllFrames(currentIndex: number, totalIndex: number) {
+  async recordAllFrames(currentIndex: number, totalIndex: number) {
     this.optons = this.generateOptions();
     this.startChallangeAudioIndex = this.randomIntFromInterval(1, 5);
     this.endChallangeAudioIndex = this.randomIntFromInterval(6, 10);
@@ -314,9 +324,9 @@ export class TumbnailComponent extends Animation implements AfterViewInit {
       this.startAudioByIndex(this.audioSrcMap.clockAudio.index);
 
       const showResultAfter = (this.videoTime * 1000);
-      setTimeout(() => {
+      setTimeout(async () => {
         const showNextItemAfter = 4500;
-        this.renderResult(currentIndex, totalIndex, showNextItemAfter);
+        await this.renderResult(currentIndex, totalIndex, showNextItemAfter);
         this.updateFrameData();
         //stop clock
         this.stopAudioByIndex(this.audioSrcMap.clockAudio.index);

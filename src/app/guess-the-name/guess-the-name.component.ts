@@ -182,7 +182,7 @@ export class GuessTheNameComponent extends EditorHelper implements AfterViewInit
 
     this.drawImage(this.bgImage);
     this.startAudioByIndex(0);
-    await this.addRapiText(400, ["Let's see", "if you", "can guess the name",  "of this Animal"],false,500);
+    await this.addRapidText(400, ["Let's see", "if you", "can guess the name",  "of this Animal"],false,500);
     await this.addDelay(500);
     
     this.mediaRecorder.pause();
@@ -197,7 +197,7 @@ export class GuessTheNameComponent extends EditorHelper implements AfterViewInit
     this.mediaRecorder.pause();
     
     this.startAudioByIndex(2);
-    await this.addRapiText(400, ["Write the", "answer in comments"],false,400);
+    await this.addRapidText(400, ["Write the", "answer in comments"],false,400);
     this.updateFrameData();
     this.mediaRecorder.resume();
     await this.addDelay(5000);
@@ -238,37 +238,5 @@ export class GuessTheNameComponent extends EditorHelper implements AfterViewInit
 
 
 
-  rapidTextInterval!: any;
-  addRapiText(intervalTime = 500, text: string[],clearPreviousText=true,startYPos=this.canvasHeight/2) {
-    return new Promise<boolean>(res => {
-
-      let fontSize=130;
-      let index = 0;
-      if (this.rapidTextInterval) {
-        clearInterval(this.rapidTextInterval);
-      }
-    
-      this.rapidTextInterval = setInterval(() => {
-
-        if (index === text.length) {
-          clearInterval(this.rapidTextInterval);
-          res(true);
-          return;
-        }
-
-        if (text[index]) {
-          if(clearPreviousText){
-            this.clearCanvas();
-            this.drawImage(this.bgImage);
-            this.addText(text[index], fontSize, '#F34573', this.canvasWidth / 2, this.canvasHeight / 2);
-          }else {
-            this.addText(text[index], fontSize, '#F34573', this.canvasWidth / 2, startYPos + (index * fontSize));
-          }
-        }
-        this.updateFrameData();
-        index += 1;
-      }, intervalTime)
-      this.mediaRecorder.resume();
-    })
-  }
+  
 }

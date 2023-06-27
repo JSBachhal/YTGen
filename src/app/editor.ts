@@ -13,9 +13,9 @@ export abstract class EditorHelper {
     constructor() { }
 
     // downloadEnable = true;
-    fontName = 'Badaboom';
+    // fontName = 'Badaboom';
     // fontName='impact';
-    // fontName='Impacted';
+    fontName = 'Impacted';
     abstract canvasWidth: number;
     abstract canvasHeight: number;
     abstract imageBloackSize: number;
@@ -25,7 +25,7 @@ export abstract class EditorHelper {
     abstract videoTime: number;
 
     abstract fontSize: number;
-    imagesArray: { img: any, imgWidth: number, imgHeigh: number }[] = [];
+    imagesArray: { img: any, imgWidth: number, imgHeigh: number, answer?: string }[] = [];
     oddImagesArray: { img: any, imgWidth: number, imgHeigh: number }[] = [];
     //   textOnTop = 'CAN YOU FIND THE ODD ONE OUT?';
     //   textOnBottom = 'SUBSCRIBE and LIKE ';
@@ -92,14 +92,24 @@ export abstract class EditorHelper {
 
     drawTimer(time: number) {
         this.drawCircle(
-            20,
-            20,
+            25,
+            25,
             25,
             'yellow',
-            'red',
+            '#ba2649',
             8
         )
-        this.addText(time.toString(), 40, 'black', 45, 45)
+        this.addText(time.toString(), 40, 'black', 50, 50);
+    }
+
+    drawTopTimer(timeLeft: number,totalTime:number) {
+        const context = this.getContext();
+        if (context) {
+            context.fillStyle = "#ba2649"//"#ba2649";
+            context.fillRect(
+                0, 0,context.canvas.width * (1- timeLeft/totalTime), 5
+            );
+        }
     }
 
 
@@ -205,7 +215,7 @@ export abstract class EditorHelper {
         );
 
         const randomImageNumber = this.randomIntFromInterval(
-            30,
+            20,
             widthCount * heightCount
         );
         this.randomLocation = randomImageNumber;
@@ -250,11 +260,13 @@ export abstract class EditorHelper {
 
             let ctx = canvas.getContext('2d');
 
-            ctx?.rotate(Math.PI);
+            ctx?.translate(this.imageBloackSize/2, this.imageBloackSize/2);
+            ctx?.scale(-1, 1)
+            // ctx?.rotate(Math.PI);
             ctx?.drawImage(
                 this.imagesArray[index].img,
-                -this.imageBloackSize,
-                -this.imageBloackSize,
+                -this.imageBloackSize/2,
+                -this.imageBloackSize/2,
                 this.imageBloackSize,
                 this.imageBloackSize
             );
@@ -269,12 +281,12 @@ export abstract class EditorHelper {
 
     }
 
-    clearCanvas() {
+    clearCanvas(color = '#222') {
         const ctx = this.getContext();
         if (!ctx) { return; }
 
         ctx.clearRect(0, 0, this.getCanvas().width, this.getCanvas().height);
-        ctx.fillStyle = '#222';
+        ctx.fillStyle = color;
         ctx.fillRect(0, 0, this.getCanvas().width, this.getCanvas().height);
     }
 
@@ -354,6 +366,10 @@ export abstract class EditorHelper {
         ctx.textBaseline = 'middle';
         ctx.textAlign = 'center';
 
+        // ctx.strokeStyle = '#FFF';
+        // ctx.lineWidth = 3;
+        // ctx.strokeText(string, xpos, ypos);
+
         ctx.fillStyle = color;
         ctx.fillText(string, xpos, ypos);
     }
@@ -399,10 +415,14 @@ export abstract class EditorHelper {
         }, 75);
     }
 
-    drawImage(img: any, x: number = 0, y: number = 0) {
+    drawImage(img: any, x: number = 0, y: number = 0, config?: { imgWidth: number, imgHeight: number }) {
         const ctx = this.getContext();
         if (!ctx) { return };
-        ctx.drawImage(img, x, y)
+        if (config) {
+            ctx.drawImage(img, x, y, config.imgWidth, config.imgHeight)
+        } else {
+            ctx.drawImage(img, x, y)
+        }
     }
 
     downloadThumbnail(imagePath = this.getCanvas().toDataURL(), imageName: string = 'thumbnail') {
@@ -429,4 +449,44 @@ export abstract class EditorHelper {
             }, delay);
         })
     }
+
+    rapidTextInterval!: any;
+    addRapidText(intervalTime = 500, text: string[], clearPreviousText = true, xpos = this.canvasWidth / 2,
+        startYPos = this.canvasHeight / 2, options?: { fontSize?: number, color?: string, padding?: number }) {
+
+        const config = { fontSize: 90, color: '#ba2649', padding: 20, ...options }
+        return new Promise<boolean>(res => {
+
+            let index = 0;
+            if (this.rapidTextInterval) {
+                clearInterval(this.rapidTextInterval);
+            }
+
+            this.rapidTextInterval = setInterval(() => {
+
+                if (index === text.length) {
+                    clearInterval(this.rapidTextInterval);
+                    res(true);
+                    return;
+                }
+
+                let yOffset = text.length > 1 ? (index + 1) * (config.fontSize + config.padding) : 0;
+                let yPos = startYPos - (config.fontSize * text.length);
+                yPos = yPos + yOffset;
+
+                if (text[index]) {
+                    if (clearPreviousText) {
+                        this.clearCanvas();
+                        this.addText(text[index], config.fontSize, config.color, xpos, this.canvasHeight / 2);
+                    } else {
+                        this.addText(text[index], config.fontSize, config.color, xpos, yPos);
+                    }
+                }
+                this.updateFrameData();
+                index += 1;
+            }, intervalTime)
+
+        })
+    }
+
 }
