@@ -81,8 +81,6 @@ export class TumbnailComponent extends Animation implements AfterViewInit {
     // this.createElements();
     // this.player.nativeElement.srcObject = this.getCanvas().captureStream();
 
-    this.renderIntro()
-    // await this.loadBGImage();
     this.bgImage = await this.loadImage(this.bgPath, this.bgImage);
     this.logoImage = await this.loadImage(this.logoPath, this.logoImage);
     this.createVirtualCanvas();
@@ -281,7 +279,7 @@ export class TumbnailComponent extends Animation implements AfterViewInit {
     this.clearCanvas();
     mediaRecorder.start();
 
-    await this.createIntro(mediaRecorder);
+    // await this.createIntro(mediaRecorder);
 
 
     this.startAudioByIndex(11);
@@ -316,7 +314,7 @@ export class TumbnailComponent extends Animation implements AfterViewInit {
       let time = 10;
       this.timerInterval = setInterval(() => {
         if (time < 0) { return }
-        this.drawTimer(time);
+        this.drawTimer(time,10);
         this.updateFrameData();
         time = time - 1;
       }, 1000);
@@ -408,137 +406,7 @@ export class TumbnailComponent extends Animation implements AfterViewInit {
 
   }
 
-  async createIntro(mediaRecorder: MediaRecorder) {
-    return new Promise(async resolve => {
-      mediaRecorder.pause();
-      const ctx = this.getContext();
-      // render bg
-      if (!ctx) { return }
-      this.renderIntro();
 
-      this.play();
-
-      mediaRecorder.resume();
-      // intro audio
-      this.startAudioByIndex(0);
-
-
-      setTimeout(async () => {
-        this.stop();
-
-        await this.awaitTextRender(["1 Correct Answer = 1 POINT"], 120, 4000);
-        await this.awaitTextRender(["LEVEL 1"], 120, 2000);
-        resolve(true);
-        // this.insertIntroText(['1 Correct Answer = 1 POINT']);
-        // this.updateFrameData();
-
-
-
-        // setTimeout(() => {
-
-        //   this.insertIntroText(['LEVEL 1']);
-        //   this.updateFrameData();
-
-
-        //   setTimeout(() => resolve(true), 2000)
-
-        // }, 4000);
-
-      }, 9000);
-
-    })
-  }
-
-
-  introVideo: HTMLVideoElement | null = null;
-  introVideoCanvas: HTMLCanvasElement | null = null;
-  videoWidth!: number;
-  videoHeight!: number;
-
-  createVideoElement() {
-    const introVideoCanvas = document.createElement('canvas');
-    const ctx = introVideoCanvas.getContext('2d', { willReadFrequently: true });
-    if (!ctx) { return };
-    ctx.canvas.width = this.canvasWidth;
-    // ctx.canvas.width = 1920;
-    // ctx.canvas.height = 1080;
-    ctx.canvas.height = this.canvasHeight;
-
-    const introVideo = document.createElement('video');
-    introVideo.src = 'assets/introvideo/introBrainTherapy.mp4';
-
-    introVideo.addEventListener("loadedmetadata", (e) => {
-      this.videoWidth = 1920 // this.canvasWidth;
-      this.videoHeight = 1080 // this.canvasHeight;
-
-    }, false);
-
-    this.introVideo = introVideo;
-    this.introVideoCanvas = introVideoCanvas;
-
-  }
-
-  async renderIntro() {
-    this.createVideoElement();
-    this.introVideo?.addEventListener("play", () => {
-      this.timerCallback()
-    })
-  }
-
-  play() {
-    this.drawImage(this.bgImage);
-    this.introVideo?.play();
-  }
-
-  stop() {
-    this.introVideo?.pause();
-    this.introVideo = null
-    this.introVideoCanvas = null;
-  }
-
-  async timerCallback() {
-    if (this.introVideo?.paused || this.introVideo?.ended) {
-      return;
-    }
-    const { frame, imgData } = await this.computeFrame();
-
-
-    const ctx = this.getContext();
-    if (!frame || !ctx) { return };
-    this.frameData = frame;
-
-    ctx.putImageData(frame, ctx.canvas.width / 2, ctx.canvas.height / 2);
-    setTimeout(() => {
-      this.timerCallback();
-    }, 0);
-
-  }
-
-  async computeFrame() {
-    const ctx = this.introVideoCanvas?.getContext('2d', { willReadFrequently: true });
-
-    ctx?.drawImage(this.introVideo as any, 0, 0, this.canvasWidth, this.canvasHeight);
-
-    // let frame = ctx?.getImageData(0, 0, this.videoWidth, this.videoHeight);
-    let frame = ctx?.getImageData(0, 0, this.canvasWidth, this.canvasHeight);
-    let imgData = ctx?.canvas.toDataURL() // (0, 0, this.videoWidth, this.videoHeight);
-    // if (!frame) { return };
-
-    // let l = frame.data.length / 4;
-
-    // const data = frame.data;
-
-    // for (let i = 0; i < l; i++) {
-    //   let r = frame.data[i * 4 + 0];
-    //   let g = frame.data[i * 4 + 1];
-    //   let b = frame.data[i * 4 + 2];
-    //   if (g > 100 && r > 100 && b < 43)
-    //     frame.data[i * 4 + 3] = 0;
-    // }
-
-    return { frame, imgData };
-
-  }
 
 
   insertIntroText(text: string[], fontSize = 150) {

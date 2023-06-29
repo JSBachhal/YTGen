@@ -93,4 +93,5 @@ export abstract class Animation extends EditorHelper {
         for (var e in this.elements)
             this.elements[e].draw(this.getContext(), time);
     }
+    
 }

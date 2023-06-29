@@ -162,7 +162,7 @@ export class MotivationalComponent extends EditorHelper implements AfterViewInit
           res(true);
           return;
         }
-        this.drawTimer(time);
+        this.drawTimer(time,timer);
         this.updateFrameData();
         time = time - 1;
       }, 1000);

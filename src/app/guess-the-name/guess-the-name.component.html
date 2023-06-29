@@ -8,7 +8,7 @@
         </div>
         <div>
           <label>Input Images</label>
-          <input type="file" class="file-input" (change)="onFileSelected($event)" #fileUpload />
+          <input type="file" class="file-input" multiple (change)="onFileSelected($event)" #fileUpload />
         </div>
    
         <div>
@@ -81,11 +81,9 @@
                 <div style="padding-right: .5rem;">
                   <label>Main</label>
                   <img [src]="img.img.src" width="50" height="50">
+                  <textarea [(ngModel)]="answers[index]" ></textarea>
                 </div>
-                <div style="padding-left: .5rem;" *ngIf="oddImagesArray.length">
-                  <label>Odd at {{randomLocation}}</label>
-                  <img [src]="oddImagesArray[index].img.src" width="50" height="50">
-                </div>
+               
   
   
               </div>

@@ -75,7 +75,7 @@ export class DesktopViewComponent extends Animation implements AfterViewInit {
   async ngAfterViewInit() {
     this.clearCanvas();
     
-    const player = await this.renderIntro(this.introPath,()=>null);
+    const player = await this.renderVideo(this.introPath,()=>null);
     player.play();
     // await this.loadBGImage();
     this.bgImage = await this.loadImage('assets/BG4k4.webp', this.bgImage);
@@ -213,9 +213,9 @@ export class DesktopViewComponent extends Animation implements AfterViewInit {
     mediaRecorder.start();
     mediaRecorder.pause();
     this.drawImage(this.bgImage);
-    const player = await this.createIntro(mediaRecorder);
-    player.play();
+    await this.addVideo(this.introPath);
     mediaRecorder.resume();
+    await this.play(this.bgImage);
     // intro audio
     this.startAudioByIndex(0);
 
@@ -267,10 +267,11 @@ export class DesktopViewComponent extends Animation implements AfterViewInit {
       }
 
 
-      let time = 10;
+      let timer = 10;
+      let time = timer;
       this.timerInterval = setInterval(() => {
         if (time < 0) { return }
-        this.drawTimer(time);
+        this.drawTimer(time,timer);
         this.updateFrameData();
         time = time - 1;
       }, 1000);
@@ -378,108 +379,8 @@ export class DesktopViewComponent extends Animation implements AfterViewInit {
 
   }
 
-  async createIntro(mediaRecorder: MediaRecorder) {
-    return new Promise<HTMLVideoElement>(async resolve => {
-      
-      const ctx = this.getContext();
-      // render bg
-      if (!ctx) { return }
-      this.renderIntro(this.introPath,(playerElement)=>resolve(playerElement));
+  
 
-    })
-  }
-
-
-  introVideo: HTMLVideoElement | null = null;
-  introVideoCanvas: HTMLCanvasElement | null = null;
-  videoWidth!: number;
-  videoHeight!: number;
-
-  createVideoElement(videoSrc: string, readyCallback: (introVideo:HTMLVideoElement) => void) {
-    const introVideoCanvas = document.createElement('canvas');
-    const ctx = introVideoCanvas.getContext('2d', { willReadFrequently: true });
-    if (!ctx) { return };
-    ctx.canvas.width = this.canvasWidth;
-    // ctx.canvas.width = 1920;
-    // ctx.canvas.height = 1080;
-    ctx.canvas.height = this.canvasHeight;
-
-    const introVideo = document.createElement('video');
-    introVideo.src = videoSrc;
-
-    introVideo.onloadedmetadata = (e) => {
-      this.videoWidth = 1920 // this.canvasWidth;
-      this.videoHeight = 1080 // this.canvasHeight;
-      readyCallback(introVideo);
-    };
-
-    introVideo.onplay = (e) => {
-      this.timerCallback()
-    };
-
-    this.introVideo = introVideo;
-    this.introVideoCanvas = introVideoCanvas;
-    return this.introVideo;
-  }
-
-  async renderIntro(videoSrc:string,readyCallback:(introVideo:HTMLVideoElement)=>void) {
-    return this.createVideoElement(videoSrc,readyCallback) as HTMLVideoElement;
-  }
-
-  play() {
-    this.drawImage(this.bgImage);
-    return this.introVideo?.play();
-  }
-
-  stop() {
-    this.introVideo?.pause();
-    this.introVideo = null
-    this.introVideoCanvas = null;
-  }
-
-  async timerCallback() {
-    if (this.introVideo?.paused || this.introVideo?.ended) {
-      return;
-    }
-    const { frame, imgData } = await this.computeFrame();
-
-
-    const ctx = this.getContext();
-    if (!frame || !ctx) { return };
-    this.frameData = frame;
-
-    ctx.putImageData(frame, ctx.canvas.width / 2, ctx.canvas.height / 2);
-    setTimeout(() => {
-      this.timerCallback();
-    }, 0);
-
-  }
-
-  async computeFrame() {
-    const ctx = this.introVideoCanvas?.getContext('2d', { willReadFrequently: true });
-
-    ctx?.drawImage(this.introVideo as any, 0, 0, this.canvasWidth, this.canvasHeight);
-
-    // let frame = ctx?.getImageData(0, 0, this.videoWidth, this.videoHeight);
-    let frame = ctx?.getImageData(0, 0, this.canvasWidth, this.canvasHeight);
-    let imgData = ctx?.canvas.toDataURL() // (0, 0, this.videoWidth, this.videoHeight);
-    // if (!frame) { return };
-
-    // let l = frame.data.length / 4;
-
-    // const data = frame.data;
-
-    // for (let i = 0; i < l; i++) {
-    //   let r = frame.data[i * 4 + 0];
-    //   let g = frame.data[i * 4 + 1];
-    //   let b = frame.data[i * 4 + 2];
-    //   if (g > 100 && r > 100 && b < 43)
-    //     frame.data[i * 4 + 3] = 0;
-    // }
-
-    return { frame, imgData };
-
-  }
 
 
   insertIntroText(text: string[], fontSize = 150) {

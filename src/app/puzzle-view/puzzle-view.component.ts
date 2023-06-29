@@ -25,9 +25,9 @@ export class PuzzleViewComponent extends EditorHelper implements AfterViewInit {
   puzzleFontSize = 90;
   textOnTop = 'CAN YOU FIND THE ODD ONE OUT?';
   textOnBottom = 'SUBSCRIBE and LIKE ';
-  audiopath1 = 'assets/guessTheName/guessTheNameAudio.mp3';
+  introduction = 'assets/riddles/audio/introduction.mp3';
   endAudio = 'assets/guessTheName/endAudio.mp3';
-  bgAudio = 'assets/guessTheName/bgAudio.mp3';
+  bgAudio = 'assets/riddles/audio/BGAudio.mp3';
 
   introImagePath = 'assets/riddles/intro1.png';
   introImage: any;
@@ -35,10 +35,31 @@ export class PuzzleViewComponent extends EditorHelper implements AfterViewInit {
   imgQuestionMark: any;
 
   audioSrcMap: AudioSrcMapModel = {
-    introAudio: { name: 'introAudio', path: this.audiopath1, index: 0 },
+    introAudio: { name: 'introAudio', path: this.introduction, index: 0 },
     bgAudio: { name: 'bgAudio', path: this.bgAudio, index: 1 },
     endAudio: { name: 'endAudio', path: this.endAudio, index: 2 },
 
+    number: { name: 'number', path: 'assets/audio/numbers/number.mp3', index: 3 },
+    number1: { name: 'number1', path: 'assets/audio/numbers/1.mp3', index: 4 },
+    number2: { name: 'number2', path: 'assets/audio/numbers/2.mp3', index: 5 },
+    number3: { name: 'number3', path: 'assets/audio/numbers/3.mp3', index: 6 },
+    number4: { name: 'number4', path: 'assets/audio/numbers/4.mp3', index: 7 },
+    number5: { name: 'number5', path: 'assets/audio/numbers/5.mp3', index: 8 },
+    number6: { name: 'number6', path: 'assets/audio/numbers/6.mp3', index: 9 },
+    number7: { name: 'number7', path: 'assets/audio/numbers/7.mp3', index: 10 },
+    number8: { name: 'number8', path: 'assets/audio/numbers/8.mp3', index: 11 },
+    number9: { name: 'number9', path: 'assets/audio/numbers/9.mp3', index: 12 },
+    number10: { name: 'number10', path: 'assets/audio/numbers/10.mp3', index: 13 },
+    number11: { name: 'number11', path: 'assets/audio/numbers/11.mp3', index: 14 },
+    number12: { name: 'number12', path: 'assets/audio/numbers/12.mp3', index: 14 },
+    number13: { name: 'number13', path: 'assets/audio/numbers/13.mp3', index: 15 },
+    number14: { name: 'number14', path: 'assets/audio/numbers/14.mp3', index: 16 },
+    number15: { name: 'number15', path: 'assets/audio/numbers/15.mp3', index: 17 },
+    number16: { name: 'number16', path: 'assets/audio/numbers/16.mp3', index: 18 },
+    number17: { name: 'number17', path: 'assets/audio/numbers/17.mp3', index: 19 },
+    number18: { name: 'number18', path: 'assets/audio/numbers/18.mp3', index: 20 },
+    number19: { name: 'number19', path: 'assets/audio/numbers/19.mp3', index: 21 },
+    number20: { name: 'number20', path: 'assets/audio/numbers/20.mp3', index: 22 },
   };
 
   bgImage: any;
@@ -175,8 +196,8 @@ export class PuzzleViewComponent extends EditorHelper implements AfterViewInit {
           res(true);
           return;
         }
-        this.drawTimer(time);
-        this.drawTopTimer(time,timer);
+        this.drawTimer(time,timer);
+        // this.drawTopTimer(time, timer);
         this.updateFrameData();
         time = time - 1;
       }, 1000);
@@ -189,11 +210,12 @@ export class PuzzleViewComponent extends EditorHelper implements AfterViewInit {
       this.clearCanvas();
       this.drawImage(this.bgImage);
       this.drawImage(this.introImage, (this.canvasWidth / 2) + (this.introImage.width / 2), this.canvasHeight / 2 - this.introImage.height);
-      
+
       this.drawImage(this.imgQuestionMark,
-        (this.canvasWidth -300 ),
-        this.canvasHeight/2  + 200 , {imgWidth:300,imgHeight:300});
+        (this.canvasWidth - 300),
+        this.canvasHeight / 2 + 200, { imgWidth: 300, imgHeight: 300 });
       this.mediaRecorder.resume();
+      this.startAudioByIndex(this.audioSrcMap.introAudio.index);
       await this.addRapidText(450, [
         `${this.puzzleTexts.length} VERY HARD`,
         'RIDDLES',
@@ -201,11 +223,11 @@ export class PuzzleViewComponent extends EditorHelper implements AfterViewInit {
       ], false,
         (this.canvasWidth / 2) / 2, (this.canvasHeight / 2) + 150, { fontSize: 140, color: '#ba2649' });
 
-      await this.addDelay(2500);
+      await this.addDelay(13000);
       res(true);
     })
   }
-  
+
 
 
 
@@ -219,10 +241,10 @@ export class PuzzleViewComponent extends EditorHelper implements AfterViewInit {
     this.drawImage(this.bgImage);
     this.mediaRecorder.start();
     this.mediaRecorder.pause();
-    
+
     await this.renderIntro();
-    
-    
+
+
     this.mediaRecorder.pause();
 
     for (let index = 0; index < this.puzzleTexts.length; index++) {
@@ -234,11 +256,15 @@ export class PuzzleViewComponent extends EditorHelper implements AfterViewInit {
     this.mediaRecorder.pause();
     this.clearCanvas();
     this.drawImage(this.bgImage);
-    await this.renderText("Write In the Comments How many did you get? Dont Forget To Like and Subscribe");
+    await this.addRapidText(200,
+      ["Write In the Comments. How many did you get?",
+        "Dont Forget To Like 👍 and Subscribe"],
+        false
+    );
     this.mediaRecorder.resume();
     this.startAudioByIndex(2);
     this.startAudioByIndex(this.audioSrcMap.bgAudio.index);
-    await this.addDelay(3000);
+    await this.addDelay(4500);
 
     this.mediaRecorder.stop();
     if (this.EnableAudio) {
@@ -252,17 +278,24 @@ export class PuzzleViewComponent extends EditorHelper implements AfterViewInit {
     return new Promise(async res => {
       this.clearCanvas();
       this.drawImage(this.bgImage);
-      await this.addRapidText(200, [`Number ${index + 1}`],false);
+      await this.addRapidText(200, [`Number ${index + 1}`], false);
       this.updateFrameData();
       this.mediaRecorder.resume();
+      // number sudio
+      // this.startAudioByIndex(this.audioSrcMap.bgAudio.index);
+      this.startAudioByIndex(this.audioSrcMap.number.index);
+      await this.addDelay(500);
+      this.startAudioByIndex((this.audioSrcMap as any)[`number${index + 1}`].index);
+
+
       await this.addDelay(1500);
 
       this.mediaRecorder.pause();
       this.clearCanvas();
       this.drawImage(this.bgImage);
       this.drawImage(this.imgQuestionMark,
-        (this.canvasWidth -300 ),
-        this.canvasHeight/2  + 200 , {imgWidth:300,imgHeight:300});
+        (this.canvasWidth - 300),
+        this.canvasHeight / 2 + 200, { imgWidth: 300, imgHeight: 300 });
 
       const text = this.puzzleTexts[index];
       const delay = this.puzzleTexts[index].delay;
@@ -282,15 +315,22 @@ export class PuzzleViewComponent extends EditorHelper implements AfterViewInit {
         }
       }
 
+      await this.addRapidText(450, [`${index+1} / ${this.puzzleTexts.length}`], false, this.canvasWidth - 90, 80, { fontSize: 40, });
       await this.addRapidText(450, textData, false, this.canvasWidth / 2, this.canvasHeight / 2, { fontSize: this.puzzleFontSize, color: '#FFF' });
-      this.updateFrameData();
-      this.startAudioByIndex(this.audioSrcMap.bgAudio.index);
+      
       this.mediaRecorder.resume();
+
+
+      if (index && index % 3 === 0) {
+        await this.addRapidText(0, ['Dont Forget to Like 👍 and Subscribe'], false, this.canvasWidth / 2, this.canvasHeight - 40, { fontSize: 40, color: 'yellow' });
+      }
+
+     
       await this.startTimer(parseInt(delay.toString()));
 
       await this.renderText(text.answer, 5, 'Answer : ');
       await this.addDelay(2000);
-      this.stopAudioByIndex(this.audioSrcMap.bgAudio.index);
+      // this.stopAudioByIndex(this.audioSrcMap.bgAudio.index);
       res(true);
     })
   }

@@ -15,7 +15,7 @@ export class MobileViewComponent extends EditorHelper implements AfterViewInit {
   canvasHeight = 1920;
   imageBloackSize = 145;
   textBloackSize = 70;
-  bgColor='#222';
+  bgColor='#84e4f7';
 
   videoTime = 4.5;
 
@@ -28,6 +28,7 @@ export class MobileViewComponent extends EditorHelper implements AfterViewInit {
   audiopath4 = 'assets/audio4.mp3';
   
   audioSrcs!: any[];
+
 
   constructor() { super() }
   // bgImage:any;
@@ -168,6 +169,27 @@ export class MobileViewComponent extends EditorHelper implements AfterViewInit {
     await this.renderImage();
   }
 
+  timerInterval: any
+  startTimer(timer = 10) {
+    return new Promise(res => {
+
+      if (this.timerInterval) {
+        clearInterval(this.timerInterval);
+      }
+
+      let time = timer;
+      this.timerInterval = setInterval(() => {
+        if (time < 0) {
+          res(true);
+          return;
+        }
+        this.drawTimer(time,timer);
+        this.updateFrameData();
+        time = time - 1;
+      }, 1000);
+    })
+  }
+
   async startRecording(time = this.videoTime * 1000) {
     const { mediaRecorder, audioSrc } = this.getMdeiaStreeam();
     if(this.EnableAudio){
@@ -180,14 +202,13 @@ export class MobileViewComponent extends EditorHelper implements AfterViewInit {
     await this.renderImage();
     this.updateFrameData();
     this.mediaRecorder.resume();
-    // setInterval(() => this.renderImage(), 300);
-
-    setTimeout(() => {
+    await this.startTimer(Math.floor(this.videoTime));
+    
       this.mediaRecorder.stop();
       if(this.EnableAudio){
       audioSrc.forEach(v => v.pause());
       }
-    }, time);
+    
   }
 
   
@@ -205,7 +226,7 @@ export class MobileViewComponent extends EditorHelper implements AfterViewInit {
         ctx?.drawImage(this.imagesArray[index].img, option.x, option.y, option.sw, option.sh);
       }
     });
-    this.addText(this.textOnTop, this.fontSize, 'yellow');
+    this.addText(this.textOnTop, this.fontSize, this.color);
 
   }
 

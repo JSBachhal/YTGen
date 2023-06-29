@@ -10,17 +10,19 @@ import { Animation } from '../animation';
 export class GuessTheFlagComponent extends Animation implements AfterViewInit {
 
   downloadEnable = true //true;
-  canvasWidth = 1080 //1920 //3840;
-  canvasHeight = 1920 // 1080 // 2160;
+  canvasWidth = 1920 //1920 //3840;
+  canvasHeight = 1080 // 1080 // 2160;
   imageBloackSize = 110;
   padding = 15;
   textBloackSize = 50;
-
-  videoTime = 7;
+  bgColor='#222';
+  
+  videoTime = 10;
 
   fontSize = 90;
+  override color: string='yellow';
 
-  textOnTop = 'CAN YOU NAME THE COUNTRY ?';
+  textOnTop = 'GUESS THE NAME ?';
   textOnBottom = 'SUBSCRIBE And LIKE ';
 
   audiopath1 = 'assets/audio1.mp3';
@@ -70,15 +72,18 @@ export class GuessTheFlagComponent extends Animation implements AfterViewInit {
   constructor() { super() }
 
   async ngAfterViewInit() {
-    this.clearCanvas();
 
-    this.bgImage = await this.loadImage('assets/BGGreen.jpg', this.bgImage);
+    
+    this.clearCanvas(this.bgColor);
 
-    // this.bgImage = await this.loadImage('assets/BG4k4.webp', this.bgImage);
+    // this.bgImage = await this.loadImage('assets/BGGreen.jpg', this.bgImage);
+
+    this.bgImage = await this.loadImage('assets/BG4k4.webp', this.bgImage);
     this.createVirtualCanvas();
     this.mediaRecorderOptions.audioBitsPerSecond = 8000000;
     this.mediaRecorderOptions.videoBitsPerSecond = 8000000;
-
+    
+    this.updateFrameData();
   }
 
   bgImage: any;
@@ -90,7 +95,7 @@ export class GuessTheFlagComponent extends Animation implements AfterViewInit {
   onFileSelected(e: any) {
     this.optons = this.generateOptions();
     const files = e.target.files as FileList;
-    this.clearCanvas();
+    this.clearCanvas(this.bgColor);
     for (let index = 0; index < files.length; index++) {
       const file = files[index];
 
@@ -169,7 +174,7 @@ export class GuessTheFlagComponent extends Animation implements AfterViewInit {
 
       if (!this.downloadEnable) { return }
 
-      var blob = new Blob(this.chunks, { type: 'video/webm' });
+      var blob = new Blob(this.chunks, { type: 'video/mp4' });
       // var blob = new Blob(this.chunks, { type: 'video/webm' });
       this.chunks = [];
 
@@ -179,7 +184,7 @@ export class GuessTheFlagComponent extends Animation implements AfterViewInit {
       document.body.appendChild(a);
       (a.style as any) = 'display: none';
       a.href = url;
-      a.download = 'Can you Find It ? #shorts .webm';
+      a.download = 'GUess the Pokemon name.mp4';
       a.click();
       window.URL.revokeObjectURL(url);
     };
@@ -210,60 +215,60 @@ export class GuessTheFlagComponent extends Animation implements AfterViewInit {
 
 
 
-    this.clearCanvas();
+    this.clearCanvas(this.bgColor);
     mediaRecorder.start();
 
+    this.startAudioByIndex(this.audioSrcMap.clockAudio.index);
 
-    // this.startAudioByIndex(11);
-    const allFrames = new Promise<boolean>(async res => {
-      await this.recordAllFrames(0, this.imagesArray.length, () => res(true));
-    });
-    await allFrames;
+    for (let index = 0; index < this.imagesArray.length; index++) {
+      await this.recordAllFrames(index);
+    }
+
     this.stopRecording();
+    this.stopAudioByIndex(this.audioSrcMap.clockAudio.index);
+
   }
 
   startChallangeAudioIndex = 1;
   endChallangeAudioIndex = 7;
 
-  timerInterval: any;
-
-  async recordAllFrames(currentIndex: number, totalIndex: number, doneCallback: () => void) {
-
-    this.mediaRecorder.pause();
-    this.clearCanvas();
-
-    if (currentIndex < totalIndex) {
-      await this.renderFlag(currentIndex);
-      this.updateFrameData();
-      this.mediaRecorder.resume();
-
+  timerInterval: any
+  startTimer(timer = 10) {
+    return new Promise(res => {
 
       if (this.timerInterval) {
         clearInterval(this.timerInterval);
       }
 
-
-      let time = this.videoTime;
+      let time = timer;
       this.timerInterval = setInterval(() => {
-        if (time < 0) { return }
-        this.drawTimer(time);
+        if (time < 0) {
+          res(true);
+          return;
+        }
+        this.drawTimer(time,timer);
         this.updateFrameData();
         time = time - 1;
       }, 1000);
+    })
+  }
 
-      const showResultAfter = (this.videoTime * 1000);
-      setTimeout(async () => {
-        if (this.timerInterval) {
-          clearInterval(this.timerInterval);
-        }
-        const showNextItemAfter = 500;
-        await this.renderResult(currentIndex, totalIndex, showNextItemAfter, doneCallback);
-        this.updateFrameData();
-      }, showResultAfter);
+  tranitionPath='assets/transitions/transition1.mp4'
+  async recordAllFrames(currentIndex: number) {
 
-    } else {
-      doneCallback();
-    }
+    this.mediaRecorder.pause();
+    this.clearCanvas(this.bgColor);
+    await this.renderFlag(currentIndex);
+    this.updateFrameData();
+    this.mediaRecorder.resume();
+    await this.startTimer(Math.floor(this.videoTime));
+
+    await this.renderResult(currentIndex);
+    this.updateFrameData();
+    await this.addDelay(1000);
+    
+    await this.addVideo(this.tranitionPath);
+    await this.play(this.bgImage);
 
   }
 
@@ -272,31 +277,49 @@ export class GuessTheFlagComponent extends Animation implements AfterViewInit {
     this.drawImage(this.bgImage, 0, 0);
 
     const ctx = this.getContext();
-    await this.addRapidText(0, [...'LIKE'.split(''), '👇'], false, this.getCanvas().width - 120, 250)
+    
+    const xOffSet = 0;
+    const yOffSet = 0;
 
-    const xOffSet = 40;
-    const yOffSet = 100;
+    // const xOffSet = 40;
+    // const yOffSet = 100;
     const flag = this.imagesArray[index];
+    const img = await this.getTransparentImage(
+      {
+        img: flag.img,
+        x: (this.canvasWidth / 2 - flag.imgWidth / 2) - xOffSet,
+        y: (this.canvasHeight / 2 - flag.imgHeigh / 2) - yOffSet,
+        dw: flag.imgWidth,
+        dh: flag.imgHeigh
+      });
+
+  
     ctx?.drawImage(
-      flag.img,
-      (this.canvasWidth / 2 - flag.imgWidth / 2) - xOffSet,
-      (this.canvasHeight / 2 - flag.imgHeigh / 2) - yOffSet,
+      img,
+      (this.canvasWidth / 2 - flag.imgWidth/2) - xOffSet,
+      (this.canvasHeight / 2 - flag.imgHeigh/2) - yOffSet,
       flag.imgWidth,
       flag.imgHeigh);
-    this.addText(this.textOnTop, this.fontSize - 20, 'yellow');
+      await this.addRapidText(0, [...'SUBSCRIBE'.split('')], false, 40, this.canvasHeight/2 + 250,{fontSize:80})
+      await this.addRapidText(0, [...'LIKE'.split(''), '👍'], false, this.getCanvas().width - 150, this.canvasHeight/2 )
+      await this.addRapidText(0, ['Write in Comments'], false, this.getCanvas().width /2,this.getCanvas().height +30,{fontSize:80,padding:0})
+      this.addText(this.textOnTop, this.fontSize - 20, this.color);
+
   }
 
 
 
-  async renderResult(currentIndex: number, totalIndex: number, resultTime: number, doneCallback: () => void) {
+  async renderResult(currentIndex: number) {
+
+    const xpos = this.canvasWidth / 2 ;
+    const ypos = this.canvasHeight - 200 ;
+
     await this.addRapidText(0, [this.imagesArray[currentIndex].answer?.toUpperCase() || ''],
       false,
-      this.canvasWidth / 2,
-      this.canvasHeight - 200, { fontSize: 140 });
+      xpos,
+      ypos, { fontSize: 140 ,drawOnBackround:true});
     this.updateFrameData();
-    setTimeout(() => {
-      this.recordAllFrames(currentIndex + 1, totalIndex, doneCallback);
-    }, resultTime);
+    
   }
 
 
@@ -332,128 +355,11 @@ export class GuessTheFlagComponent extends Animation implements AfterViewInit {
 
   }
 
-  async createIntro(mediaRecorder: MediaRecorder) {
-    return new Promise(async resolve => {
-      mediaRecorder.pause();
-      const ctx = this.getContext();
-      // render bg
-      if (!ctx) { return }
-      this.renderIntro();
 
-      this.play();
-
-      mediaRecorder.resume();
-      // intro audio
-      this.startAudioByIndex(0);
-
-
-      setTimeout(async () => {
-        this.stop();
-
-        await this.awaitTextRender(["1 Correct Answer = 1 POINT"], 120, 4000);
-        await this.awaitTextRender(["LEVEL 1"], 120, 2000);
-        resolve(true);
-        // this.insertIntroText(['1 Correct Answer = 1 POINT']);
-        // this.updateFrameData();
-
-
-
-        // setTimeout(() => {
-
-        //   this.insertIntroText(['LEVEL 1']);
-        //   this.updateFrameData();
-
-
-        //   setTimeout(() => resolve(true), 2000)
-
-        // }, 4000);
-
-      }, 9000);
-
-    })
-  }
-
-
-  introVideo: HTMLVideoElement | null = null;
-  introVideoCanvas: HTMLCanvasElement | null = null;
-  videoWidth!: number;
-  videoHeight!: number;
-
-  createVideoElement() {
-    const introVideoCanvas = document.createElement('canvas');
-    const ctx = introVideoCanvas.getContext('2d', { willReadFrequently: true });
-    if (!ctx) { return };
-    ctx.canvas.width = this.canvasWidth;
-    // ctx.canvas.width = 1920;
-    // ctx.canvas.height = 1080;
-    ctx.canvas.height = this.canvasHeight;
-
-    const introVideo = document.createElement('video');
-    introVideo.src = 'assets/introvideo/introBrainTherapy.mp4';
-
-    introVideo.addEventListener("loadedmetadata", (e) => {
-      this.videoWidth = 1920 // this.canvasWidth;
-      this.videoHeight = 1080 // this.canvasHeight;
-
-    }, false);
-
-    this.introVideo = introVideo;
-    this.introVideoCanvas = introVideoCanvas;
-
-  }
-
-  async renderIntro() {
-    this.createVideoElement();
-    this.introVideo?.addEventListener("play", () => {
-      this.timerCallback()
-    })
-  }
-
-  play() {
-    this.drawImage(this.bgImage);
-    this.introVideo?.play();
-  }
-
-  stop() {
-    this.introVideo?.pause();
-    this.introVideo = null
-    this.introVideoCanvas = null;
-  }
-
-  async timerCallback() {
-    if (this.introVideo?.paused || this.introVideo?.ended) {
-      return;
-    }
-    const { frame, imgData } = await this.computeFrame();
-
-
-    const ctx = this.getContext();
-    if (!frame || !ctx) { return };
-    this.frameData = frame;
-
-    ctx.putImageData(frame, ctx.canvas.width / 2, ctx.canvas.height / 2);
-    setTimeout(() => {
-      this.timerCallback();
-    }, 0);
-
-  }
-
-  async computeFrame() {
-    const ctx = this.introVideoCanvas?.getContext('2d', { willReadFrequently: true });
-
-    ctx?.drawImage(this.introVideo as any, 0, 0, this.canvasWidth, this.canvasHeight);
-
-    // let frame = ctx?.getImageData(0, 0, this.videoWidth, this.videoHeight);
-    let frame = ctx?.getImageData(0, 0, this.canvasWidth, this.canvasHeight);
-    let imgData = ctx?.canvas.toDataURL() // (0, 0, this.videoWidth, this.videoHeight);
-
-    return { frame, imgData };
-
-  }
 
 
   insertIntroText(text: string[], fontSize = 150) {
-    this.clearCanvas();
+    this.clearCanvas(this.bgColor);
     this.drawImage(this.bgImage);
 
     text.forEach((text, index) => {

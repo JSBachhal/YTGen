@@ -58,26 +58,29 @@ export class GuessTheNameComponent extends EditorHelper implements AfterViewInit
 
 
   // Here, I created a function to draw image.
+  answers:string[]=[];
   async onFileSelected(e: any) {
+    const files = e.target.files as FileList;
     this.clearCanvas();
+    for (let index = 0; index < files.length; index++) {
+      const file = files[index];
 
-    // this.optons = this.generateOptions();
-    const reader = new FileReader();
-    const file = e.target.files[0];
-    // load to image to get it's width/height
-    const img = new Image();
-    img.onload = async () => {
-      this.imagesArray[0] = { img: img, imgWidth: img.width, imgHeigh: img.height };
-      // this.oddImagesArray[0] = await this.getOddImage(0) as any;
-      await this.renderImage(0);
-    };
+      const reader = new FileReader();
 
-    // this is to setup loading the image
-    reader.onloadend = function () {
-      img.src = reader.result as any;
-    };
-    // this is to read the file
-    reader.readAsDataURL(file);
+      const img = new Image();
+      img.onload = async () => {
+        this.imagesArray[index] = { img: img, imgWidth: img.width, imgHeigh: img.height };
+        this.answers.push('');
+
+        await this.renderImage(index);
+      };
+
+      reader.onloadend = () => {
+        img.src = reader.result as any;
+      };
+      reader.readAsDataURL(file);
+
+    }
   }
 
 
@@ -166,7 +169,7 @@ export class GuessTheNameComponent extends EditorHelper implements AfterViewInit
           res(true);
           return;
         }
-        this.drawTimer(time);
+        this.drawTimer(time,timer);
         this.updateFrameData();
         time = time - 1;
       }, 1000);
@@ -178,29 +181,31 @@ export class GuessTheNameComponent extends EditorHelper implements AfterViewInit
 
     this.clearCanvas();
     this.mediaRecorder.start();
-    this.mediaRecorder.pause();
 
-    this.drawImage(this.bgImage);
-    this.startAudioByIndex(0);
-    await this.addRapidText(400, ["Let's see", "if you", "can guess the name",  "of this Animal"],false,500);
-    await this.addDelay(500);
-    
-    this.mediaRecorder.pause();
-    this.startAudioByIndex(1);
-    await this.renderImage();
-    this.mediaRecorder.resume();
-    this.updateFrameData();
-
-    await this.startTimer();
-    this.stopAudioByIndex(1);
+    // this.drawImage(this.bgImage);
+    // this.startAudioByIndex(0);
+    // await this.addRapidText(400, ["Let's see", "if you", "can guess the name"],false,this.canvasWidth/2,this.canvasHeight/2,{color:'yellow'});
+    // await this.addDelay(500);
     
     this.mediaRecorder.pause();
     
-    this.startAudioByIndex(2);
-    await this.addRapidText(400, ["Write the", "answer in comments"],false,400);
-    this.updateFrameData();
-    this.mediaRecorder.resume();
-    await this.addDelay(5000);
+    for (let index = 0; index < this.imagesArray.length; index++) {
+      this.clearCanvas();
+      await this.renderImage(index);
+      this.updateFrameData();
+      this.mediaRecorder.resume();
+      this.startAudioByIndex(1);
+      await this.startTimer(3);
+      this.stopAudioByIndex(1);
+    }
+    
+    // this.mediaRecorder.pause();
+    
+    // this.startAudioByIndex(2);
+    // await this.addRapidText(400, ["Write the", "answer in comments"],false);
+    // this.updateFrameData();
+    // this.mediaRecorder.resume();
+    // await this.addDelay(100);
 
 
     this.mediaRecorder.stop();
@@ -214,8 +219,17 @@ export class GuessTheNameComponent extends EditorHelper implements AfterViewInit
   async renderImage(index: number = 0) {
     const ctx = this.getContext();
     this.drawImage(this.bgImage);
-    this.addText('Guess the Animal Name', 100, 'yellow', this.canvasWidth / 2, 100)
-    ctx?.drawImage(this.imagesArray[index].img, 200, 200, this.imagesArray[index].imgWidth, this.imagesArray[index].imgHeigh);
+    this.addText('Guess the Name', 100, 'yellow', this.canvasWidth / 2, 100)
+    this.addText('Write in comments', 50, 'yellow', this.canvasWidth / 2, this.canvasHeight-50)
+    ctx?.drawImage(this.imagesArray[index].img, 0, 0, this.imagesArray[index].imgWidth, this.imagesArray[index].imgHeigh);
+    this.updateFrameData();
+  }
+  
+  async renderResult(index: number = 0) {
+    const ctx = this.getContext();
+    this.drawImage(this.bgImage);
+    this.addText('Guess the Name', 100, 'yellow', this.canvasWidth / 2, 100)
+    await this.addRapidText(400, [this.answers[index]],false);
   }
 
 
