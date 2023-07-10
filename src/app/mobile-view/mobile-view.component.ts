@@ -13,28 +13,31 @@ export class MobileViewComponent extends EditorHelper implements AfterViewInit {
 
   canvasWidth = 1080;
   canvasHeight = 1920;
-  imageBloackSize = 145;
+  imageBloackSize = 150;
   textBloackSize = 70;
-  bgColor='#84e4f7';
+  // bgColor = '#222'//'#84e4f7';
+  bgColor = '#222'//'#84e4f7';
+  override TextBgcolor: string = 'Yellow';
 
-  videoTime = 4.5;
+
+  videoTime = 3.5;
 
   fontSize = 70;
-  textOnTop = 'FIND THE ODD ONE OUT?';
+  textOnTop = '👀 FIND THE ODD EMOJI & LIKE';
   textOnBottom = 'SUBSCRIBE and LIKE ';
   audiopath1 = 'assets/audio1.mp3';
   audiopath2 = 'assets/audio2.wav';
   audiopath3 = 'assets/audio3.mp3';
   audiopath4 = 'assets/audio4.mp3';
-  
+
   audioSrcs!: any[];
 
 
   constructor() { super() }
   // bgImage:any;
   async ngAfterViewInit() {
-    this.imageBloackSize = parseInt(prompt('Please provide imageBloackSize', this.imageBloackSize.toString()) 
-    || this.imageBloackSize.toString()) ;
+    this.imageBloackSize = parseInt(prompt('Please provide imageBloackSize', this.imageBloackSize.toString())
+      || this.imageBloackSize.toString());
     this.clearCanvas(this.bgColor);
     this.createVirtualCanvas();
     // this.bgImage = await this.loadImage('assets/BGBlue.webp', this.bgImage);
@@ -44,7 +47,7 @@ export class MobileViewComponent extends EditorHelper implements AfterViewInit {
     // this.drawImage(this.bgImage);
   }
 
-  updateUI(){
+  updateUI() {
     this.ngAfterViewInit();
   }
 
@@ -53,25 +56,27 @@ export class MobileViewComponent extends EditorHelper implements AfterViewInit {
 
   // Here, I created a function to draw image.
   async onFileSelected(e: any) {
+    this.optons = this.generateOptions();
+    const files = e.target.files as FileList;
     this.clearCanvas(this.bgColor);
+    for (let index = 0; index < files.length; index++) {
+      const file = files[index];
 
-    this.optons = this.generateOptions({padding:10});
-    const reader = new FileReader();
-    const file = e.target.files[0];
-    // load to image to get it's width/height
-    const img = new Image();
-    img.onload = async () => {
-      this.imagesArray[0] = { img: img, imgWidth: img.width, imgHeigh: img.height };
-      this.oddImagesArray[0] = await this.getOddImage(0) as any;
-      await this.renderImage(0);
-    };
+      const reader = new FileReader();
 
-    // this is to setup loading the image
-    reader.onloadend = function () {
-      img.src = reader.result as any;
-    };
-    // this is to read the file
-    reader.readAsDataURL(file);
+      const img = new Image();
+      img.onload = async () => {
+        this.imagesArray[index] = { img: img, imgWidth: img.width, imgHeigh: img.height };
+        this.oddImagesArray[index] = await this.getOddImage(index) as any;
+        await this.renderImage(index);
+      };
+
+      reader.onloadend = () => {
+        img.src = reader.result as any;
+      };
+      reader.readAsDataURL(file);
+
+    }
   }
 
   async onOddFileSelected(e: any) {
@@ -115,7 +120,7 @@ export class MobileViewComponent extends EditorHelper implements AfterViewInit {
 
   chunks: any = [];
   mediaRecorder!: MediaRecorder;
-  vidSrc:any;
+  vidSrc: any;
   getMdeiaStreeam() {
     const VirtualVideoStream = this.getVirtualCanvasContext().canvas.captureStream();
     // const videoStream = this.getCanvas().captureStream();
@@ -162,8 +167,8 @@ export class MobileViewComponent extends EditorHelper implements AfterViewInit {
     return { mediaRecorder: mediaRecorder, audioSrc: audioSrcs };
   }
 
-  async redraw(){
-    this.optons= this.generateOptions({padding:10})
+  async redraw() {
+    this.optons = this.generateOptions({ padding: 10 })
     this.clearCanvas(this.bgColor);
 
     await this.renderImage();
@@ -183,7 +188,7 @@ export class MobileViewComponent extends EditorHelper implements AfterViewInit {
           res(true);
           return;
         }
-        this.drawTimer(time,timer);
+        // this.drawTimer(time, timer);
         this.updateFrameData();
         time = time - 1;
       }, 1000);
@@ -192,32 +197,37 @@ export class MobileViewComponent extends EditorHelper implements AfterViewInit {
 
   async startRecording(time = this.videoTime * 1000) {
     const { mediaRecorder, audioSrc } = this.getMdeiaStreeam();
-    if(this.EnableAudio){
+    if (this.EnableAudio) {
       audioSrc.forEach(v => v.play());
     }
 
-    this.clearCanvas(this.bgColor);
     this.mediaRecorder.start();
-    this.mediaRecorder.pause();
-    await this.renderImage();
-    this.updateFrameData();
-    this.mediaRecorder.resume();
-    await this.startTimer(Math.floor(this.videoTime));
     
-      this.mediaRecorder.stop();
-      if(this.EnableAudio){
+    for (let index = 0; index < this.imagesArray.length; index++) {
+      this.mediaRecorder.pause();
+      this.optons = this.generateOptions();
+      this.clearCanvas(this.bgColor);
+      await this.renderImage(index);
+      this.updateFrameData();
+      this.mediaRecorder.resume();
+      await this.startTimer(Math.floor(this.videoTime));
+    }
+
+
+    this.mediaRecorder.stop();
+    if (this.EnableAudio) {
       audioSrc.forEach(v => v.pause());
-      }
-    
+    }
+
   }
 
-  
+
   optons: any = [];
   async renderImage(index: number = 0) {
     // this.drawImage(this.bgImage);
     const ctx = this.getContext();
-    await this.addRapidText(0,['L','I','K','E','👇'],false, this.getCanvas().width - 120, 450)
-   
+    // await this.addRapidText(0,['L','I','K','E','👇'],false, this.getCanvas().width - 120, 450)
+
 
     this.optons.forEach((option: any) => {
       if (option.rotateImage) {
@@ -226,26 +236,32 @@ export class MobileViewComponent extends EditorHelper implements AfterViewInit {
         ctx?.drawImage(this.imagesArray[index].img, option.x, option.y, option.sw, option.sh);
       }
     });
-    this.addText(this.textOnTop, this.fontSize, this.color);
+    await this.addRapidText(0,[this.textOnTop],false, this.getCanvas().width/2, 160,
+    {
+      color:'black',
+      strokeColor:"#FFF",
+      drawOnBackround:true,
+      backroundColor:'#f34573'})
+    // this.addText(this.textOnTop, this.fontSize, this.color);
 
   }
 
 
 
-  generateOptions(options?:{
-   gridWidth? :number,
-    gridHeight? :number,
-    imageBloackSize? :number,
-    padding?:number
+  generateOptions(options?: {
+    gridWidth?: number,
+    gridHeight?: number,
+    imageBloackSize?: number,
+    padding?: number
   }
   ) {
 
-    const config ={
-      gridWidth : this.canvasWidth,
-      gridHeight : this.canvasHeight,
-      imageBloackSize : this.imageBloackSize,
-      padding : 15
-      ,...options
+    const config = {
+      gridWidth: this.canvasWidth,
+      gridHeight: this.canvasHeight,
+      imageBloackSize: this.imageBloackSize,
+      padding: 15
+      , ...options
     }
     console.log(config)
 

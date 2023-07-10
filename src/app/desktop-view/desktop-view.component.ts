@@ -13,11 +13,11 @@ export class DesktopViewComponent extends Animation implements AfterViewInit {
   downloadEnable = true //true;
   canvasWidth = 1920 //1920 //3840;
   canvasHeight = 1080 // 1080 // 2160;
-  imageBloackSize = 110;
+  imageBloackSize = 150;
   padding = 15;
   textBloackSize = 50;
 
-  videoTime = 11;
+  videoTime = 6;
 
   fontSize = 80;
 
@@ -75,10 +75,10 @@ export class DesktopViewComponent extends Animation implements AfterViewInit {
   async ngAfterViewInit() {
     this.clearCanvas();
     
-    const player = await this.renderVideo(this.introPath,()=>null);
-    player.play();
+    // const player = await this.addVideo(this.introPath);
+    // player.play();
     // await this.loadBGImage();
-    this.bgImage = await this.loadImage('assets/BG4k4.webp', this.bgImage);
+    this.bgImage = await this.loadImage('assets/BG.jpg', this.bgImage);
     this.createVirtualCanvas();
     this.mediaRecorderOptions.audioBitsPerSecond = 8000000;
     this.mediaRecorderOptions.videoBitsPerSecond = 8000000;
@@ -237,7 +237,7 @@ export class DesktopViewComponent extends Animation implements AfterViewInit {
       setTimeout(async () => {
         this.stop();
         await this.awaitTextRender(["1 Correct Answer = 1 POINT"], 120, 4000);
-        await this.awaitTextRender(["LEVEL 1"], 120, 2000);
+        await this.awaitTextRender(["LEVEL 1"], 120, 1000);
         res(true);
       }, time);
     })
@@ -267,7 +267,7 @@ export class DesktopViewComponent extends Animation implements AfterViewInit {
       }
 
 
-      let timer = 10;
+      let timer = 5;
       let time = timer;
       this.timerInterval = setInterval(() => {
         if (time < 0) { return }
@@ -298,8 +298,8 @@ export class DesktopViewComponent extends Animation implements AfterViewInit {
     const ctx = this.getContext();
     // render bg
     this.drawImage(this.bgImage);
-    await this.addRapidText(0,[this.textOnTop],false, this.getCanvas().width /2 , 50,{color:'yellow'})
-    await this.addRapidText(0,[this.textOnBottom],false, this.getCanvas().width / 2, this.getCanvas().height - this.fontSize+15)
+    await this.addRapidText(0,[this.textOnTop],false, this.getCanvas().width /2 , 150)
+    await this.addRapidText(0,[this.textOnBottom],false, this.getCanvas().width / 2, this.getCanvas().height +25)
     
     this.optons.forEach((option: any) => {
       if (option.rotateImage) {
@@ -388,7 +388,7 @@ export class DesktopViewComponent extends Animation implements AfterViewInit {
     this.drawImage(this.bgImage);
 
     text.forEach((text, index) => {
-      this.addText(text, fontSize, 'yellow', this.canvasWidth / 2, (this.canvasHeight / 2) + (index * (fontSize + 15)));
+      this.addText(text, fontSize, '#f34573', this.canvasWidth / 2, (this.canvasHeight / 2) + (index * (fontSize + 15)));
     })
 
   }

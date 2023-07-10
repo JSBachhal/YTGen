@@ -8,11 +8,11 @@
       </div>
       <div>
         <label>Input Images</label>
-        <input type="file" class="file-input" (change)="onFileSelected($event)" #fileUpload />
+        <input type="file" class="file-input" multiple (change)="onFileSelected($event)" #fileUpload />
       </div>
       <div>
         <label>Odd Images</label>
-        <input type="file" class="file-input" (change)="onOddFileSelected($event)" #fileUpload />
+        <input type="file" class="file-input" multiple (change)="onOddFileSelected($event)" #fileUpload />
       </div>
       <div>
         <label>Odd Images</label>

@@ -7,14 +7,18 @@ import { Component, OnInit } from '@angular/core';
 })
 export class RootComponent implements OnInit {
 
-  paths = ['mobileView',
+  paths = [
+    'mobileView',
     'desktopView',
     'thumbnail',
     'thumbnailMobile',
     'guessTheName',
     'puzzle',
     'motivational',
-    'guessTheFlag'];
+    'guessTheFlag',
+    'loadImages',
+    'app-desktop2'
+  ];
 
   ngOnInit(): void {
 

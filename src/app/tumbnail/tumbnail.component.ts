@@ -1,7 +1,7 @@
 import { AfterViewInit, Component } from '@angular/core';
 import { EditorHelper } from '../editor';
 import { Animation } from '../animation';
-import { AudioModel,AudioSrcMapModel } from '../desktop-view/model/audiomap.model';
+import { AudioModel, AudioSrcMapModel } from '../desktop-view/model/audiomap.model';
 
 @Component({
   selector: 'app-tumbnail',
@@ -14,18 +14,19 @@ export class TumbnailComponent extends Animation implements AfterViewInit {
   canvasWidth = 1920 //1920 //3840;
   canvasHeight = 1080 // 1080 // 2160;
   imageBloackSize = 300;
-  padding = 0;
+  padding = 15;
   textBloackSize = 50;
 
   videoTime = 11;
 
   fontSize = 80;
 
-  bgPath='assets/BG5.webp';
-  logoPath='assets/logo.png';
-  fontColor='black'
-
-  textOnTop = '99% Fail 🧠😱';
+  bgPath = 'assets/BG5.webp';
+  logoPath = 'assets/logo.png';
+  fontColor = 'black';
+  bgColor = '#f34573'//'#84e4f7';
+  // textOnTop = '99% Fail 🧠😱';
+  textOnTop = 'CAN YOU FIND THE ODD EMOJI?';
   textOnBottom = '';
 
   audiopath1 = 'assets/audio1.mp3';
@@ -75,21 +76,21 @@ export class TumbnailComponent extends Animation implements AfterViewInit {
   constructor() { super() }
 
   async ngAfterViewInit() {
-    this.imageBloackSize = parseInt(prompt('Please provide imageBloackSize', this.imageBloackSize.toString()) 
-    || this.imageBloackSize.toString()) ;
-    this.clearCanvas();
+    this.imageBloackSize = parseInt(prompt('Please provide imageBloackSize', this.imageBloackSize.toString())
+      || this.imageBloackSize.toString());
+    this.clearCanvas(this.bgColor);
     // this.createElements();
     // this.player.nativeElement.srcObject = this.getCanvas().captureStream();
 
-    this.bgImage = await this.loadImage(this.bgPath, this.bgImage);
+    // this.bgImage = await this.loadImage(this.bgPath, this.bgImage);
     this.logoImage = await this.loadImage(this.logoPath, this.logoImage);
     this.createVirtualCanvas();
     this.mediaRecorderOptions.audioBitsPerSecond = 8000000;
     this.mediaRecorderOptions.videoBitsPerSecond = 8000000;
-    
-    this.drawImage(this.logoImage,this.canvasWidth-155,this.canvasHeight-150);
-    this.addText('BRAIN THERAPY',20,'yellow',this.canvasWidth-110,this.canvasHeight-30,'Impact')
 
+    this.drawImage(this.logoImage, this.canvasWidth - 155, this.canvasHeight - 150);
+    this.addText('BRAIN THERAPY', 20, 'yellow', this.canvasWidth - 110, this.canvasHeight - 30, {font:'Impact'})
+    this.renderImage(0);
   }
 
   bgImage: any;
@@ -102,7 +103,7 @@ export class TumbnailComponent extends Animation implements AfterViewInit {
   onFileSelected(e: any) {
     this.optons = this.generateOptions();
     const files = e.target.files as FileList;
-    this.clearCanvas();
+    this.clearCanvas(this.bgColor);
     for (let index = 0; index < files.length; index++) {
       const file = files[index];
 
@@ -111,7 +112,7 @@ export class TumbnailComponent extends Animation implements AfterViewInit {
       const img = new Image();
       img.onload = async () => {
         this.imagesArray[index] = { img: img, imgWidth: img.width, imgHeigh: img.height };
-        // this.oddImagesArray[index] = await this.getOddImage(index) as any;
+        this.oddImagesArray[index] = await this.getOddImage(index) as any;
 
         await this.renderImage(index);
 
@@ -133,15 +134,15 @@ export class TumbnailComponent extends Animation implements AfterViewInit {
     // render bg
     this.drawImage(this.bgImage);
 
-    this.drawImage(this.logoImage,this.canvasWidth-155,this.canvasHeight-150);
-    this.addText('BRAIN THERAPY',20,'yellow',this.canvasWidth-110,this.canvasHeight-30,'Impact');
+    this.drawImage(this.logoImage, this.canvasWidth - (this.logoImage.width) - 50, this.canvasHeight - (this.logoImage.height) - 50);
+    this.addText('BRAIN THERAPY', 20, 'black', this.canvasWidth - 110, this.canvasHeight - 30, {font:'Impact'});
 
-    if(this.textOnTop){
-    await this.addRapidText(0,[this.textOnTop],false, this.getCanvas().width /2 , 100,{fontSize:140})
+    if (this.textOnTop) {
+      await this.addRapidText(0, [this.textOnTop], false, this.getCanvas().width / 2, 210, 
+      { color: '#f34573', fontSize: 140, drawOnBackround: true, backroundColor:'black', padding: 30 ,strokeColor:'#fff'})
     }
-    if(this.textOnBottom){
-
-      await this.addRapidText(0,[this.textOnBottom],false, (this.getCanvas().width / 2), this.getCanvas().height - this.fontSize + 15)
+    if (this.textOnBottom) {
+      await this.addRapidText(0, [this.textOnBottom], false, (this.getCanvas().width / 2), this.getCanvas().height - this.fontSize + 15)
     }
     // render like and Sub
     // await this.renderImageURI('assets/like&subscribe.png', this.getCanvas().width / 2 - 200, this.getCanvas().height - 50);
@@ -153,7 +154,7 @@ export class TumbnailComponent extends Animation implements AfterViewInit {
         ctx?.drawImage(this.imagesArray[index].img, option.x, option.y, option.sw, option.sh);
       }
     });
-    
+
     // this.addText(this.textOnTop, this.fontSize, this.fontColor);
     // this.addText(this.textOnBottom,
     //   this.fontSize,
@@ -276,7 +277,7 @@ export class TumbnailComponent extends Animation implements AfterViewInit {
 
 
 
-    this.clearCanvas();
+    this.clearCanvas(this.bgColor);
     mediaRecorder.start();
 
     // await this.createIntro(mediaRecorder);
@@ -298,7 +299,7 @@ export class TumbnailComponent extends Animation implements AfterViewInit {
     this.endChallangeAudioIndex = this.randomIntFromInterval(6, 10);
 
     this.mediaRecorder.pause();
-    this.clearCanvas();
+    this.clearCanvas(this.bgColor);
 
     if (currentIndex < totalIndex) {
       this.renderImage(currentIndex);
@@ -314,7 +315,7 @@ export class TumbnailComponent extends Animation implements AfterViewInit {
       let time = 10;
       this.timerInterval = setInterval(() => {
         if (time < 0) { return }
-        this.drawTimer(time,10);
+        this.drawTimer(time, 10);
         this.updateFrameData();
         time = time - 1;
       }, 1000);
@@ -410,7 +411,7 @@ export class TumbnailComponent extends Animation implements AfterViewInit {
 
 
   insertIntroText(text: string[], fontSize = 150) {
-    this.clearCanvas();
+    this.clearCanvas(this.bgColor);
     this.drawImage(this.bgImage);
 
     text.forEach((text, index) => {
@@ -419,6 +420,6 @@ export class TumbnailComponent extends Animation implements AfterViewInit {
 
   }
 
-  
+
 }
 

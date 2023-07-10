@@ -8,6 +8,8 @@ import { GuessTheNameComponent } from './guess-the-name/guess-the-name.component
 import { PuzzleViewComponent } from './puzzle-view/puzzle-view.component';
 import { MotivationalComponent } from './motivational/motivational.component';
 import { GuessTheFlagComponent } from './guess-the-flag/guess-the-flag.component';
+import { LoadimagesComponent } from './loadimages/loadimages.component';
+import { Desktop2Component } from './desktop2/desktop2.component';
 
 const routes: Routes = [
   { path: '', redirectTo: 'mobileView', pathMatch: 'full' },
@@ -19,6 +21,8 @@ const routes: Routes = [
   { path: 'puzzle', component: PuzzleViewComponent },
   { path: 'motivational', component: MotivationalComponent },
   { path: 'guessTheFlag', component: GuessTheFlagComponent },
+  { path: 'loadImages', component: LoadimagesComponent },
+  { path: 'app-desktop2', component: Desktop2Component },
   { path: '**', redirectTo: 'mobileView' },
 ];
 

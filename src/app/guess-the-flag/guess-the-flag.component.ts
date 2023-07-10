@@ -17,10 +17,11 @@ export class GuessTheFlagComponent extends Animation implements AfterViewInit {
   textBloackSize = 50;
   bgColor='#222';
   
-  videoTime = 10;
+  videoTime = 3;
 
   fontSize = 90;
-  override color: string='yellow';
+  override color: string='black';
+  override TextBgcolor: string='yellow';
 
   textOnTop = 'GUESS THE NAME ?';
   textOnBottom = 'SUBSCRIBE And LIKE ';
@@ -71,14 +72,19 @@ export class GuessTheFlagComponent extends Animation implements AfterViewInit {
 
   constructor() { super() }
 
+  bgImage: any;
+  pokemonBallImg: any;
   async ngAfterViewInit() {
 
     
     this.clearCanvas(this.bgColor);
 
+    this.pokemonBallImg = await this.loadImage('assets/guessTheName/pokemonBall.png', this.pokemonBallImg);
     // this.bgImage = await this.loadImage('assets/BGGreen.jpg', this.bgImage);
 
-    this.bgImage = await this.loadImage('assets/BG4k4.webp', this.bgImage);
+    this.bgImage = await this.loadImage('assets/guessTheName/BG34k.png', this.bgImage);
+    // this.bgImage = await this.loadImage('assets/BG4k1.jpg', this.bgImage);
+    // this.bgImage = await this.loadImage('assets/BG4k4.webp', this.bgImage);
     this.createVirtualCanvas();
     this.mediaRecorderOptions.audioBitsPerSecond = 8000000;
     this.mediaRecorderOptions.videoBitsPerSecond = 8000000;
@@ -86,14 +92,10 @@ export class GuessTheFlagComponent extends Animation implements AfterViewInit {
     this.updateFrameData();
   }
 
-  bgImage: any;
-  async loadBGImage() {
-    await this.renderImageURI('assets/BG4k4.webp', 0, 0, this.bgImage);
-  }
 
   // Here, I created a function to draw image.
-  onFileSelected(e: any) {
-    this.optons = this.generateOptions();
+  async onFileSelected(e: any) {
+    // this.optons = this.generateOptions();
     const files = e.target.files as FileList;
     this.clearCanvas(this.bgColor);
     for (let index = 0; index < files.length; index++) {
@@ -102,9 +104,12 @@ export class GuessTheFlagComponent extends Animation implements AfterViewInit {
       const reader = new FileReader();
 
       const img = new Image();
+      
       img.onload = async () => {
-        this.imagesArray[index] = { img: img, imgWidth: img.width, imgHeigh: img.height, answer: file.name.split('.')[0] };
+        let name = file.name.split('.')[0].split('-')[1];
+        this.imagesArray[index] = { img: img, imgWidth: img.width, imgHeigh: img.height, answer:name };
         await this.renderFlag(index);
+        this.clearCanvas(this.bgColor);
       };
 
       reader.onloadend = () => {
@@ -219,7 +224,7 @@ export class GuessTheFlagComponent extends Animation implements AfterViewInit {
     mediaRecorder.start();
 
     this.startAudioByIndex(this.audioSrcMap.clockAudio.index);
-
+   
     for (let index = 0; index < this.imagesArray.length; index++) {
       await this.recordAllFrames(index);
     }
@@ -253,7 +258,7 @@ export class GuessTheFlagComponent extends Animation implements AfterViewInit {
     })
   }
 
-  tranitionPath='assets/transitions/transition1.mp4'
+  tranitionPath='assets/transitions/transition2.mp4'
   async recordAllFrames(currentIndex: number) {
 
     this.mediaRecorder.pause();
@@ -265,16 +270,24 @@ export class GuessTheFlagComponent extends Animation implements AfterViewInit {
 
     await this.renderResult(currentIndex);
     this.updateFrameData();
-    await this.addDelay(1000);
-    
+    await this.addDelay(500);
+    // this.mediaRecorder.pause();
+    this.activeImageFrameData = this.getContext().getImageData(0,0,this.canvasWidth,this.canvasHeight);
     await this.addVideo(this.tranitionPath);
+    // this.mediaRecorder.resume();
     await this.play(this.bgImage);
+    this.mediaRecorder.pause();
+    this.activeImageFrameData = null;
 
   }
 
   optons: any = [];
   async renderFlag(index: number) {
     this.drawImage(this.bgImage, 0, 0);
+    this.drawImage(this.pokemonBallImg,
+       this.canvasWidth-this.pokemonBallImg.width/1.2 ,
+       this.canvasHeight-this.pokemonBallImg.height/1.2
+       );
 
     const ctx = this.getContext();
     
@@ -303,6 +316,10 @@ export class GuessTheFlagComponent extends Animation implements AfterViewInit {
       await this.addRapidText(0, [...'SUBSCRIBE'.split('')], false, 40, this.canvasHeight/2 + 250,{fontSize:80})
       await this.addRapidText(0, [...'LIKE'.split(''), '👍'], false, this.getCanvas().width - 150, this.canvasHeight/2 )
       await this.addRapidText(0, ['Write in Comments'], false, this.getCanvas().width /2,this.getCanvas().height +30,{fontSize:80,padding:0})
+      await this.addRapidText(0, [`${index +1 }/${this.imagesArray.length}`], 
+      false,
+       this.getCanvas().width -100,
+       150, {fontSize:80,padding:0,color:'#F34573'})
       this.addText(this.textOnTop, this.fontSize - 20, this.color);
 
   }

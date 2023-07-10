@@ -1,6 +1,12 @@
 .my-canvas {
-    background: #222;
-    background-image: url('../../assets/BG4k6.jpg');
+    // background: #222;
+    background-image: repeating-linear-gradient(
+      45deg,
+      #606dbc,
+      #606dbc 10px,
+      #465298 10px,
+      #465298 20px
+    );
   }
   
   .flex {

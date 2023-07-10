@@ -1,6 +1,7 @@
 import { ViewChild, ElementRef, Directive } from "@angular/core";
-import { makeOutlineTransparent } from "./utils/imageProcessor";
-
+declare const MarvinImage: any;
+declare const Marvin: any;
+// import * as MarvinImage from "MarvinImage";
 @Directive()
 export abstract class EditorHelper {
     @ViewChild('myCanvas', { static: true })
@@ -15,9 +16,9 @@ export abstract class EditorHelper {
     constructor() { }
 
     // downloadEnable = true;
-    // fontName = 'Badaboom';
+    fontName = 'Badaboom';
     // fontName='impact';
-    fontName = 'Impacted';
+    // fontName = 'Impacted';
     abstract canvasWidth: number;
     abstract canvasHeight: number;
     abstract imageBloackSize: number;
@@ -62,100 +63,47 @@ export abstract class EditorHelper {
                 canvas.width = config.dw;
                 canvas.height = config.dh;
                 const ctx = canvas.getContext('2d');
-                ctx?.drawImage(config.img,0,0);
-                const frame = ctx?.getImageData(0,0,config.dw,config.dh);
-                if (frame) {
+                const image = new MarvinImage();
+                // MarvinImage.prototype.load = function (img, callback) {
+                //     this.onload = callback;
+                //     this.image = new Image();
+                //     var ref = this;
+                //     this.image.onload = function () { ref.callbackImageLoaded(ref) };
+                //     this.image.crossOrigin = "anonymous";
+                //     this.image.src = url;
+                // };
+                image.image = config.img;
+                image.callbackImageLoaded(image);
 
-                    // canvas = null;
-                    let l = frame.data.length / 4;
-                    console.log('frame.data.length ',l)
-                    const data = frame.data;
-                    // console.log(config);
+                {
+                    for (var y = 0; y < image.getHeight(); y++) {
 
-                    //  for (let l = 0; l < frame.data.length ; l+=config.dw) {
-                      
-                    //     for (let w = l; w < config.dw; w+=4) {
-                            
-                    //         let  pixelLocation = w;
-                           
-                    //         console.log('pixelLocation ',pixelLocation)
-                    //         const nextPixelLocation = pixelLocation + 4;
-                    //         // console.log('nextPixelLocation ',nextPixelLocation)
-                    //         // const element = frameData[w * l];
-                
-                    //         const arr = [];
-                    //         let r = frame.data[pixelLocation + 0];
-                    //         let g = frame.data[pixelLocation + 1];
-                    //         let b = frame.data[pixelLocation + 2];
-                    //         arr.push(r);
-                    //         arr.push(g);
-                    //         arr.push(b);
-                    //         // let nextr = frame.data[nextPixelLocation + 0];
-                    //         // let nextg = frame.data[nextPixelLocation + 1];
-                    //         // let nextb = frame.data[nextPixelLocation + 2];
-                    //         // arr.push(nextr);
-                    //         // arr.push(nextg);
-                    //         // arr.push(nextb);
-                    //         let makeTransparent = true;
-                    //         for (let index = 0; index < arr.length; index++) {
-                    //             const value = arr[index];
-                    //             if (makeTransparent && value < 225) {
-                    //                 makeTransparent = false;
-                    //             }
-                    //         }
-                    //         // console.log('makeTransparent ',makeTransparent)
-                    //         if (makeTransparent) {
-                    //             frame.data[pixelLocation + 3] = 1;
-                    //             frame.data[pixelLocation + 0] = 0;
-                    //             frame.data[pixelLocation + 1] = 0;
-                    //             frame.data[pixelLocation + 2] = 0;
-                                
-                    //         } else{
-                    //             // break Inner;
-                    //         }
-                
-                    //     }
-                
-                
-                    // }
+                        for (var x = 0; x < image.getWidth(); x++) {
+                            var r = image.getIntComponent0(x, y);
+                            var g = image.getIntComponent1(x, y);
+                            var b = image.getIntComponent2(x, y);
 
-                    // makeOutlineTransparent.apply(this,[frame.data,config.dw,config.dh,frame.data.length]);
-                    for (let i = 0; i < l; i++) {
-
-                        const arr = [
-                            data[i * 4 + 0], data[i * 4 + 1], data[i * 4 + 2]
-                        ];
-                        for (let index = 1; index < 4; index++) {
-                            const nextPixel = index + 1;
-                            arr.push(data[nextPixel * 4 + 0]);
-                            arr.push(data[nextPixel * 4 + 1]);
-                            arr.push(data[nextPixel * 4 + 2]);
-                        }
-
-                        let makeTransparent = true;
-                        for (let index = 0; index < arr.length; index++) {
-                            const value = arr[index];
-                            if (value < 255) {
-                                makeTransparent = false;
-                                break;
+                            if (r >= 250 && g >= 250 && b >= 250) {
+                                image.setIntColor(x, y, 0);
                             }
                         }
-                        if (makeTransparent) {
-                            data[i * 4 + 3] = 0;
-                        }
-
                     }
-                    // console.log(data);
-                  
-                    ctx?.putImageData(frame,0,0);
-                    const image = ctx?.canvas?.toDataURL();
-                    const img = new Image();
-
-                    img.onload= ()=>{
-                        res(img);
-                    };
-                    img.src= image as any;
                 }
+
+                Marvin.alphaBoundary(image.clone(), image, 8);
+                // image.draw(ctx?.canvas);
+                // ctx?.drawImage(config.img, 0, 0);
+                // const frame = ctx?.getImageData(0, 0, config.dw, config.dh);
+                // if (frame) {
+                ctx?.putImageData(image.imageData, 0, 0);
+                const imageURL = ctx?.canvas?.toDataURL();
+                const img = new Image();
+
+                img.onload = () => {
+                    res(img);
+                };
+                img.src = imageURL as any;
+                // }
             }
         });
     }
@@ -175,9 +123,7 @@ export abstract class EditorHelper {
     }
 
     updateVirtualCanvas() {
-        // const frameData = this.getUpdatedFrameData();
         if (this.frameData) {
-            // this.getVirtualCanvasContext().drawImage(frameData as any,0,0);
             this.getVirtualCanvasContext().putImageData(this.frameData, 0, 0);
         }
         requestAnimationFrame(() => this.updateVirtualCanvas());
@@ -185,10 +131,7 @@ export abstract class EditorHelper {
 
     updateFrameData() {
         const ctx = this.getContext();
-        if (!ctx) { return; }
-        // this.frameData = ctx.canvas.toDataURL();// getImageData(0,0,this.canvasWidth,this.canvasHeight);
         this.frameData = ctx.getImageData(0, 0, this.canvasWidth, this.canvasHeight);
-        // console.log(this.frameData)
     }
 
     // gethiddenCanvas() {
@@ -316,22 +259,24 @@ export abstract class EditorHelper {
         const options = [];
 
         let count = 0;
-        let widthCount = Math.floor(gridWidth / (imageBloackSize + imagePadding)) - 1;
-        this.widthOfset = (gridWidth % imageBloackSize) + imagePadding;
+        const items = gridWidth / (imageBloackSize + imagePadding);
+        let widthCount = Math.floor(items);
+
+        this.widthOfset = (this.canvasWidth - ((imageBloackSize + imagePadding) * widthCount)) / 2;
         let widthOfset = this.widthOfset;
 
         this.heightOfset = (imageBloackSize + imagePadding) / 1.2;
         let heightOfset = this.heightOfset;
 
-        console.log('widthOfset ' + widthOfset);
-        console.log('heightOfset ' + heightOfset);
+        // console.log('widthOfset ' + widthOfset);
+        // console.log('heightOfset ' + heightOfset);
 
         let heightCount = Math.floor(
             (gridHeight / (imageBloackSize + imagePadding)) - 1
         );
 
         const randomImageNumber = this.randomIntFromInterval(
-            20,
+            15,
             widthCount * heightCount
         );
         this.randomLocation = randomImageNumber;
@@ -472,16 +417,27 @@ export abstract class EditorHelper {
         color: string,
         xpos: number = this.getCanvas().width / 2,
         ypos: number = fontSize,
-        font = this.fontName
+        config?: {
+            font?: string,
+            strokeColor?: string
+        }
     ) {
+
+        const options = {
+            font: this.fontName,
+            strokeColor: '#FFF',
+            ...config
+        }
         const ctx = this.getContext();
         if (!ctx) {
             return;
         }
-        ctx.font = (fontSize).toString() + `px ${font}`;
+        ctx.font = (fontSize).toString() + `px ${options.font}`;
         ctx.textBaseline = 'middle';
         ctx.textAlign = 'center';
-
+        ctx.strokeStyle = options.strokeColor;
+        ctx.lineWidth = 10;
+        ctx.strokeText(string, xpos, ypos);
         ctx.fillStyle = color;
         ctx.fillText(string, xpos, ypos);
     }
@@ -567,10 +523,14 @@ export abstract class EditorHelper {
         startYPos = this.canvasHeight / 2, options?: {
             fontSize?: number, color?: string, padding?: number,
             drawOnBackround?: boolean
+            backroundColor?: string,
+            strokeColor?: string
         }) {
 
         const config = {
             fontSize: 90, color: this.color, padding: 20, drawOnBackround: false,
+            backroundColor: '#FFF',
+            strokeColor: '#FFF',
             ...options
         }
         return new Promise<boolean>(res => {
@@ -596,8 +556,7 @@ export abstract class EditorHelper {
                 if (text[index]) {
 
                     if (config.drawOnBackround && index === 0) {
-                        const padding = (10 / this.fontSize) * 100;
-                        this.drawRect(yPos - padding, config.fontSize);
+                        this.drawRect(yPos, config.fontSize, { bgColor: config.backroundColor, heightPaddingPercentage: 20 });
                     }
 
                     if (clearPreviousText) {
@@ -605,7 +564,7 @@ export abstract class EditorHelper {
                         this.addText(text[index], config.fontSize, config.color, xpos, this.canvasHeight / 2);
                     } else {
 
-                        this.addText(text[index], config.fontSize, config.color, xpos, yPos);
+                        this.addText(text[index], config.fontSize, config.color, xpos, yPos, { strokeColor: config.strokeColor });
                     }
                 }
                 this.updateFrameData();
@@ -615,15 +574,15 @@ export abstract class EditorHelper {
         })
     }
 
-
-    drawRect(ypos: number, fontSize: number, bgColor = 'yellow',) {
+    TextBgcolor: string = '#FFF';
+    drawRect(ypos: number, fontSize: number, options = { heightPaddingPercentage: 20, bgColor: this.TextBgcolor }) {
         const ctx = this.getContext();
-        ctx.fillStyle = bgColor;
+        ctx.fillStyle = options.bgColor || '#FFF';
         ctx.font = (fontSize).toString() + `px ${this.fontName}`;
 
-        let height = ctx.measureText('M').width + 20;
-
-        ctx.fillRect(0, ypos - (height / 2) + 10, this.canvasWidth, height);
+        let fontHeight = ctx.measureText('M').width;
+        let height = fontHeight + ((options.heightPaddingPercentage / fontHeight) * 100);
+        ctx.fillRect(0, ypos - height, this.canvasWidth, height * 1.75);
     }
 
 
@@ -651,8 +610,8 @@ export abstract class EditorHelper {
 
 
 
-        introVideo.onplay = (e) => {
-            this.timerCallback()
+        introVideo.onplaying = (e) => {
+            this.timerCallback(ctx)
         };
 
 
@@ -665,7 +624,7 @@ export abstract class EditorHelper {
 
     play(img: any) {
         return new Promise(res => {
-            this.drawImage(img);
+            // this.drawImage(img);
             (this.introVideo as HTMLVideoElement).onended = (e) => res(true);
             this.introVideo?.play();
         })
@@ -677,63 +636,54 @@ export abstract class EditorHelper {
         this.introVideoCanvas = null;
     }
 
-    async timerCallback() {
+    timerCallback(ctx: CanvasRenderingContext2D) {
         if (this.introVideo?.paused || this.introVideo?.ended) {
             return;
         }
-        const { frame, imgData } = await this.computeFrame();
+        const { frame } = this.computeFrame(ctx);
 
-
-        const ctx = this.getContext();
-        if (!frame || !ctx) { return };
-        this.frameData = frame;
-
-        ctx.putImageData(frame, 0, 0);
-        // ctx.putImageData(frame, ctx.canvas.width / 2, ctx.canvas.height / 2);
+        this.getContext().putImageData(frame, 0, 0);
+        this.updateFrameData();
         setTimeout(() => {
-            this.timerCallback();
+            this.timerCallback(ctx);
         }, 0);
 
     }
 
-    async computeFrame() {
-        const ctx = this.introVideoCanvas?.getContext('2d', { willReadFrequently: true });
-
-        ctx?.drawImage(this.introVideo as any, 0, 0, this.canvasWidth, this.canvasHeight);
-
-        // let frame = ctx?.getImageData(0, 0, this.videoWidth, this.videoHeight);
-        let frame = ctx?.getImageData(0, 0, this.canvasWidth, this.canvasHeight) as ImageData;
-        let imgData = ctx?.canvas.toDataURL() // (0, 0, this.videoWidth, this.videoHeight);
-        // if (!frame) { return };
+    activeImageFrameData!: ImageData | null;
+    computeFrame(ctx: CanvasRenderingContext2D) {
+        ctx.drawImage(this.introVideo as any, 0, 0, this.canvasWidth, this.canvasHeight);
+        let frame = ctx.getImageData(0, 0, this.canvasWidth, this.canvasHeight) as ImageData;
+        // let imgData = ctx?.canvas.toDataURL() // (0, 0, this.videoWidth, this.videoHeight);
 
         let l = frame.data.length / 4;
 
         const data = frame.data;
 
         for (let i = 0; i < l; i++) {
-          let r = frame.data[i * 4 + 0];
-          let g = frame.data[i * 4 + 1];
-          let b = frame.data[i * 4 + 2];
-          if (g > 100 && r > 100 && b < 43)
-            frame.data[i * 4 + 3] = 0;
-        }
+            const index = i * 4;
+            let r = frame.data[index + 0];
+            let g = frame.data[index + 1];
+            let b = frame.data[index + 2];
+            if (g < 10 && r < 10 && b < 10) {
 
-        return { frame, imgData };
+                if (this.activeImageFrameData) {
+                    frame.data[index + 0] = this.activeImageFrameData.data[index + 0];
+                    frame.data[index + 1] = this.activeImageFrameData.data[index + 1];
+                    frame.data[index + 2] = this.activeImageFrameData.data[index + 2];
+                }
+
+                frame.data[i * 4 + 3] = 100;
+            }
+        }
+        return { frame };
 
     }
 
     async addVideo(introPath: string) {
-        return new Promise<HTMLVideoElement>(async resolve => {
-
-            const ctx = this.getContext();
-            // render bg
-            if (!ctx) { return }
-            this.renderVideo(introPath, (playerElement) => resolve(playerElement));
-
+        return new Promise<HTMLVideoElement>(resolve => {
+            this.createVideoElement(introPath, (playerElement) => resolve(playerElement));
         })
     }
 
-    async renderVideo(videoSrc: string, readyCallback: (introVideo: HTMLVideoElement) => void) {
-        return this.createVideoElement(videoSrc, readyCallback) as HTMLVideoElement;
-    }
 }

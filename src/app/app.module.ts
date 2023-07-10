@@ -13,6 +13,8 @@ import { GuessTheNameComponent } from './guess-the-name/guess-the-name.component
 import { PuzzleViewComponent } from './puzzle-view/puzzle-view.component';
 import { MotivationalComponent } from './motivational/motivational.component';
 import { GuessTheFlagComponent } from './guess-the-flag/guess-the-flag.component';
+import { LoadimagesComponent } from './loadimages/loadimages.component';
+import { Desktop2Component } from './desktop2/desktop2.component';
 
 @NgModule({
   declarations: [
@@ -24,7 +26,9 @@ import { GuessTheFlagComponent } from './guess-the-flag/guess-the-flag.component
     GuessTheNameComponent,
     PuzzleViewComponent,
     MotivationalComponent,
-    GuessTheFlagComponent
+    GuessTheFlagComponent,
+    LoadimagesComponent,
+    Desktop2Component
   ],
   imports: [
     CommonModule,
