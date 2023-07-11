@@ -150,14 +150,14 @@ export abstract class EditorHelper {
 
     drawTimer(time: number, timer: number) {
         this.drawCircle(
-            25,
-            25,
-            25,
+            35,
+            35,
+            35,
             'yellow',
             '#ba2649',
             8
         )
-        this.addText(time.toString(), 40, 'black', 50, 50);
+        this.addText(time.toString(), 40, 'black', 70, 70);
         this.drawTopTimer(time, timer);
     }
 

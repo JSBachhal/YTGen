@@ -94,7 +94,6 @@
                 <div style="padding-left: .5rem;" *ngIf="oddImagesArray.length">
                   <label>Odd at {{randomLocation}}</label>
                   <img [src]="oddImagesArray[index].img.src" width="50" height="50">
-                  <input type="file" class="file-input"  (change)="changeOddFileSelected($event,index)" />
                 </div>
   
   

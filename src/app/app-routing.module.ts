@@ -10,6 +10,7 @@ import { MotivationalComponent } from './motivational/motivational.component';
 import { GuessTheFlagComponent } from './guess-the-flag/guess-the-flag.component';
 import { LoadimagesComponent } from './loadimages/loadimages.component';
 import { Desktop2Component } from './desktop2/desktop2.component';
+import { AmanVidComponent } from './aman-vid/aman-vid.component';
 
 const routes: Routes = [
   { path: '', redirectTo: 'mobileView', pathMatch: 'full' },
@@ -23,6 +24,7 @@ const routes: Routes = [
   { path: 'guessTheFlag', component: GuessTheFlagComponent },
   { path: 'loadImages', component: LoadimagesComponent },
   { path: 'app-desktop2', component: Desktop2Component },
+  { path: 'amanVideo', component: AmanVidComponent },
   { path: '**', redirectTo: 'mobileView' },
 ];
 

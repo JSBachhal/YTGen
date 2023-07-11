@@ -17,7 +17,8 @@ export class RootComponent implements OnInit {
     'motivational',
     'guessTheFlag',
     'loadImages',
-    'app-desktop2'
+    'app-desktop2',
+    'amanVideo'
   ];
 
   ngOnInit(): void {

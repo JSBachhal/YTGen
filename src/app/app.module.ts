@@ -15,6 +15,7 @@ import { MotivationalComponent } from './motivational/motivational.component';
 import { GuessTheFlagComponent } from './guess-the-flag/guess-the-flag.component';
 import { LoadimagesComponent } from './loadimages/loadimages.component';
 import { Desktop2Component } from './desktop2/desktop2.component';
+import { AmanVidComponent } from './aman-vid/aman-vid.component';
 
 @NgModule({
   declarations: [
@@ -28,7 +29,8 @@ import { Desktop2Component } from './desktop2/desktop2.component';
     MotivationalComponent,
     GuessTheFlagComponent,
     LoadimagesComponent,
-    Desktop2Component
+    Desktop2Component,
+    AmanVidComponent
   ],
   imports: [
     CommonModule,
