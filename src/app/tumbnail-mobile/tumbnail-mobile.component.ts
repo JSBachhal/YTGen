@@ -181,6 +181,7 @@ export class TumbnailMobileComponent  extends EditorHelper implements AfterViewI
 
     this.clearCanvas();
     this.mediaRecorder.start();
+    this.startTime = Date.now();
     this.mediaRecorder.pause();
     await this.renderImage();
     this.updateFrameData();

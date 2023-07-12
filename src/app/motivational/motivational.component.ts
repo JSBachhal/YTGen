@@ -179,6 +179,7 @@ export class MotivationalComponent extends EditorHelper implements AfterViewInit
 
     this.clearCanvas();
     this.mediaRecorder.start();
+    this.startTime = Date.now();
     this.mediaRecorder.pause();
 
     this.drawImage(this.bgImage);

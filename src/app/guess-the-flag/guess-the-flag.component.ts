@@ -221,7 +221,8 @@ export class GuessTheFlagComponent extends Animation implements AfterViewInit {
 
 
     this.clearCanvas(this.bgColor);
-    mediaRecorder.start();
+    this.mediaRecorder.start();
+    this.startTime = Date.now();
 
     this.startAudioByIndex(this.audioSrcMap.clockAudio.index);
    

@@ -26,7 +26,7 @@ export abstract class EditorHelper {
     abstract audioSrcs: any[];
 
     abstract videoTime: number;
-
+    startTime: number = 0;
     abstract fontSize: number;
     imagesArray: { img: any, imgWidth: number, imgHeigh: number, answer?: string }[] = [];
     oddImagesArray: { img: any, imgWidth: number, imgHeigh: number }[] = [];
@@ -284,7 +284,7 @@ export abstract class EditorHelper {
         // console.log('widthCount' + widthCount);
         // console.log('heightCount' + heightCount);
         let xPosition = widthOfset;
-        let yPosition = heightOfset;
+        let yPosition = heightOfset + imagePadding;
         for (let height = 0; height < heightCount; height++) {
             for (let width = 0; width < widthCount; width++) {
                 count += 1;

@@ -181,6 +181,7 @@ export class GuessTheNameComponent extends EditorHelper implements AfterViewInit
 
     this.clearCanvas();
     this.mediaRecorder.start();
+    this.startTime = Date.now();
 
     // this.drawImage(this.bgImage);
     // this.startAudioByIndex(0);

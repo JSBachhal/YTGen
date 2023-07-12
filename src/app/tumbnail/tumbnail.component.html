@@ -8,6 +8,8 @@
         </div>
         <div>
             <input type="file" class="file-input" multiple (change)="onFileSelected($event)" #fileUpload />
+            <input type="file" class="file-input" multiple (change)="changeOddFileSelected($event,0)" #oddfileUpload />
+            <button (click)="redraw()" >redraw</button>
         </div>
         <div>
             <a [routerLink]="['/mobileView']">Mobile View</a> 

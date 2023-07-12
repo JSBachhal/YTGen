@@ -202,6 +202,7 @@ export class AmanVidComponent extends EditorHelper implements AfterViewInit {
     }
 
     this.mediaRecorder.start();
+    this.startTime = Date.now();
     
     for (let index = 0; index < this.imagesArray.length; index++) {
       this.mediaRecorder.pause();

@@ -209,11 +209,10 @@ export class Desktop2Component extends EditorHelper implements AfterViewInit {
       if (!this.downloadEnable) { return }
 
       var blob = new Blob(this.chunks, { type: 'video/webm' });
-      // var blob = new Blob(this.chunks, { type: 'video/webm' });
+      const fixedBlob = await webmFixDuration(blob, duration);
       this.chunks = [];
-
-
-      var url = URL.createObjectURL(blob);
+      
+      var url = URL.createObjectURL(fixedBlob);
       var a = document.createElement('a') as any;
       document.body.appendChild(a);
       (a.style as any) = 'display: none';
@@ -265,6 +264,7 @@ export class Desktop2Component extends EditorHelper implements AfterViewInit {
     // }
 
     this.mediaRecorder.start();
+    this.startTime = Date.now();
 
     for (let index = 0; index < this.imagesArray.length; index++) {
       this.mediaRecorder.pause();
@@ -279,15 +279,15 @@ export class Desktop2Component extends EditorHelper implements AfterViewInit {
       const oddindex = await this.renderImage(index);
       this.updateFrameData();
       this.mediaRecorder.resume();
-      this.startAudioByIndex(this.startChallangeAudioIndex);
-      await this.addDelay(2000);
-
+      // this.startAudioByIndex(this.startChallangeAudioIndex);
+      await this.addDelay(1500);
       this.startAudioByIndex(this.audioSrcMap.clockAudio.index);
       await this.startTimer(Math.floor(this.videoTime));
-
+      
       this.mediaRecorder.pause();
+      this.stopAudioByIndex(this.audioSrcMap.clockAudio.index);
       await this.animateOddImage(oddindex, index);
-      this.startAudioByIndex(this.endChallangeAudioIndex);
+      // this.startAudioByIndex(this.endChallangeAudioIndex);
       this.updateFrameData();
       this.addDelay(3000)
     }
@@ -324,7 +324,9 @@ export class Desktop2Component extends EditorHelper implements AfterViewInit {
         sh = sh + index;
         
       if(index === time){
-        this.highLightOddImage(option.x-time - (incrementStep*2), option.y-time - (incrementStep*2), sw)
+        ctx.fillStyle = '#222';
+        this.highLightOddImage(option.x-time - (incrementStep*2), option.y-time - (incrementStep*2), sw);
+        ctx.fillStyle = this.bgColor;
       }
         ctx.drawImage(this.oddImagesArray[imgIndex].img, x, y, sw, sh);
         this.updateFrameData();
@@ -345,7 +347,8 @@ export class Desktop2Component extends EditorHelper implements AfterViewInit {
       fill,
       'red',
       8
-    )
+    );
+  
   }
 
 
@@ -368,7 +371,7 @@ export class Desktop2Component extends EditorHelper implements AfterViewInit {
           ctx?.drawImage(this.imagesArray[index].img, option.x, option.y, option.sw, option.sh);
         }
       });
-      await this.addRapidText(0, [this.textOnTop], false, this.getCanvas().width / 2, 160,
+      await this.addRapidText(0, [this.textOnTop], false, this.getCanvas().width / 2, 150,
         {
           color: 'black',
           strokeColor: "#FFF",

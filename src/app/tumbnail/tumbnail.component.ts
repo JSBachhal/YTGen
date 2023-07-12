@@ -2,6 +2,7 @@ import { AfterViewInit, Component } from '@angular/core';
 import { EditorHelper } from '../editor';
 import { Animation } from '../animation';
 import { AudioModel, AudioSrcMapModel } from '../desktop-view/model/audiomap.model';
+import { webmFixDuration } from 'webm-fix-duration';
 
 @Component({
   selector: 'app-tumbnail',
@@ -13,7 +14,7 @@ export class TumbnailComponent extends Animation implements AfterViewInit {
   downloadEnable = true //true;
   canvasWidth = 1920 //1920 //3840;
   canvasHeight = 1080 // 1080 // 2160;
-  imageBloackSize = 300;
+  imageBloackSize = 150;
   padding = 15;
   textBloackSize = 50;
 
@@ -127,6 +128,29 @@ export class TumbnailComponent extends Animation implements AfterViewInit {
     }
   }
 
+  async redraw() {
+    this.optons = this.generateOptions()
+    this.clearCanvas(this.bgColor);
+
+    await this.renderImage(0);
+  }
+  async changeOddFileSelected(e:any,index:number){
+    const reader = new FileReader();
+    const file = e.target.files[0];
+
+    const img = new Image();
+    img.onload = async () => {
+      this.oddImagesArray[index] = { img, imgWidth: img.width, imgHeigh: img.height };
+    };
+
+    // this is to setup loading the image
+    reader.onloadend = function () {
+      img.src = reader.result as any;
+    };
+    // this is to read the file
+    reader.readAsDataURL(file);
+  }
+
   optons: any = [];
   async renderImage(index: number) {
 
@@ -222,16 +246,15 @@ export class TumbnailComponent extends Animation implements AfterViewInit {
     // const mediaRecorder = new MediaRecorder(outputStream);
     this.mediaRecorder = mediaRecorder;
 
-    mediaRecorder.onstop = (e) => {
+    mediaRecorder.onstop = async (e) => {
 
       if (!this.downloadEnable) { return }
-
+      const duration = Date.now() - this.startTime;
       var blob = new Blob(this.chunks, { type: 'video/webm' });
-      // var blob = new Blob(this.chunks, { type: 'video/webm' });
+      const fixedBlob = await webmFixDuration(blob, duration);
       this.chunks = [];
-
-
-      var url = URL.createObjectURL(blob);
+      
+      var url = URL.createObjectURL(fixedBlob);
       var a = document.createElement('a') as any;
       document.body.appendChild(a);
       (a.style as any) = 'display: none';
@@ -278,7 +301,8 @@ export class TumbnailComponent extends Animation implements AfterViewInit {
 
 
     this.clearCanvas(this.bgColor);
-    mediaRecorder.start();
+    this.mediaRecorder.start();
+    this.startTime = Date.now();
 
     // await this.createIntro(mediaRecorder);
 

@@ -2,6 +2,7 @@ import { AfterViewInit, Component } from '@angular/core';
 import { EditorHelper } from '../editor';
 import { Animation } from '../animation';
 import { AudioModel, AudioSrcMapModel } from './model/audiomap.model';
+import { webmFixDuration } from 'webm-fix-duration';
 
 @Component({
   selector: 'app-desktop-view',
@@ -167,16 +168,15 @@ export class DesktopViewComponent extends Animation implements AfterViewInit {
     // const mediaRecorder = new MediaRecorder(outputStream);
     this.mediaRecorder = mediaRecorder;
 
-    mediaRecorder.onstop = (e) => {
+    mediaRecorder.onstop = async (e) => {
 
       if (!this.downloadEnable) { return }
-
+      const duration = Date.now() - this.startTime;
       var blob = new Blob(this.chunks, { type: 'video/webm' });
-      // var blob = new Blob(this.chunks, { type: 'video/webm' });
+      const fixedBlob = await webmFixDuration(blob, duration);
       this.chunks = [];
-
-
-      var url = URL.createObjectURL(blob);
+      
+      var url = URL.createObjectURL(fixedBlob);
       var a = document.createElement('a') as any;
       document.body.appendChild(a);
       (a.style as any) = 'display: none';
@@ -210,7 +210,9 @@ export class DesktopViewComponent extends Animation implements AfterViewInit {
     const { mediaRecorder, audioSrc } = this.getMdeiaStreeam(time);
 
     this.clearCanvas();
-    mediaRecorder.start();
+    this.mediaRecorder.start();
+    this.startTime = Date.now();
+    
     mediaRecorder.pause();
     this.drawImage(this.bgImage);
     await this.addVideo(this.introPath);

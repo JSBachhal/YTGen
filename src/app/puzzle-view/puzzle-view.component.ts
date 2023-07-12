@@ -240,6 +240,7 @@ export class PuzzleViewComponent extends EditorHelper implements AfterViewInit {
     this.clearCanvas();
     this.drawImage(this.bgImage);
     this.mediaRecorder.start();
+    this.startTime = Date.now();
     this.mediaRecorder.pause();
 
     await this.renderIntro();

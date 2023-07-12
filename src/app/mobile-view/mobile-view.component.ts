@@ -1,5 +1,6 @@
 import { AfterViewInit, Component } from '@angular/core';
 import { EditorHelper } from '../editor';
+import { webmFixDuration } from 'webm-fix-duration';
 
 @Component({
   selector: 'app-mobile-view',
@@ -11,9 +12,9 @@ export class MobileViewComponent extends EditorHelper implements AfterViewInit {
   downloadEnable = true;
   EnableAudio = true;
 
-  canvasWidth = 1080;
-  canvasHeight = 1920;
-  imageBloackSize = 150;
+  canvasWidth = 2160//1080;
+  canvasHeight = 3840 //1920;
+  imageBloackSize = 300;
   textBloackSize = 70;
   // bgColor = '#222'//'#84e4f7';
   bgColor = '#222'//'#84e4f7';
@@ -22,7 +23,7 @@ export class MobileViewComponent extends EditorHelper implements AfterViewInit {
 
   videoTime = 3.5;
 
-  fontSize = 70;
+  fontSize = 140;
   textOnTop = '👀 FIND THE ODD EMOJI & LIKE';
   textOnBottom = 'SUBSCRIBE and LIKE ';
   audiopath1 = 'assets/audio1.mp3';
@@ -142,21 +143,18 @@ export class MobileViewComponent extends EditorHelper implements AfterViewInit {
 
     const mediaRecorder = new MediaRecorder(outputStream, this.mediaRecorderOptions);
     this.mediaRecorder = mediaRecorder;
-    mediaRecorder.onstop = (e) => {
-
+    mediaRecorder.onstop = async (e) => {
+      const duration = Date.now() - this.startTime;
       var blob = new Blob(this.chunks, { type: 'video/webm' });
-      // this.player.nativeElement.srcObject= blob;
-      // this.vidSrc= blob;
+      const fixedBlob = await webmFixDuration(blob, duration);
       this.chunks = [];
-      // return
-
-
-      var url = URL.createObjectURL(blob);
+      
+      var url = URL.createObjectURL(fixedBlob);
       var a = document.createElement('a') as any;
       document.body.appendChild(a);
       (a.style as any) = 'display: none';
       a.href = url;
-      a.download = 'Find the odd one out @braindevelopmentSkills .mp4';
+      a.download = 'Find the odd one out @braindevelopmentSkills .webm';
       a.click();
       window.URL.revokeObjectURL(url);
     };
@@ -194,7 +192,7 @@ export class MobileViewComponent extends EditorHelper implements AfterViewInit {
       }, 1000);
     })
   }
-
+  
   async startRecording(time = this.videoTime * 1000) {
     const { mediaRecorder, audioSrc } = this.getMdeiaStreeam();
     if (this.EnableAudio) {
@@ -202,6 +200,7 @@ export class MobileViewComponent extends EditorHelper implements AfterViewInit {
     }
 
     this.mediaRecorder.start();
+    this.startTime = Date.now();
     
     for (let index = 0; index < this.imagesArray.length; index++) {
       this.mediaRecorder.pause();
