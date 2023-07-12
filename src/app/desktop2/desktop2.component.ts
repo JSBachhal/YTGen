@@ -1,6 +1,7 @@
 import { AfterViewInit, Component, numberAttribute } from '@angular/core';
 import { EditorHelper } from '../editor';
 import { AudioModel, AudioSrcMapModel } from '../desktop-view/model/audiomap.model';
+import { webmFixDuration } from 'webm-fix-duration';
 
 @Component({
   selector: 'app-desktop2',
@@ -204,10 +205,10 @@ export class Desktop2Component extends EditorHelper implements AfterViewInit {
     // const mediaRecorder = new MediaRecorder(outputStream);
     this.mediaRecorder = mediaRecorder;
 
-    mediaRecorder.onstop = (e) => {
+    mediaRecorder.onstop = async (e) => {
 
       if (!this.downloadEnable) { return }
-
+      const duration = Date.now() - this.startTime;
       var blob = new Blob(this.chunks, { type: 'video/webm' });
       const fixedBlob = await webmFixDuration(blob, duration);
       this.chunks = [];
